@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import Phaser, { NONE } from 'phaser';
 import { Player } from '../gameObjects/Player';
 import PlayerSprite from '../assets/player.png';
 import BulletSprite from '../assets/bullet.png';
@@ -9,6 +9,7 @@ import Mozart from '../assets/audio/mozart_einekleine.mp3';
 export class GameScene extends Phaser.Scene {
   gameObjects: Phaser.GameObjects.GameObject[] = [];
   music?: Phaser.Sound.BaseSound;
+  minimap?: Phaser.Cameras.Scene2D.CameraManager;
 
   public preload() {
     this.load.spritesheet('player', PlayerSprite, {
@@ -64,6 +65,28 @@ export class GameScene extends Phaser.Scene {
       map.heightInPixels * MAP_SCALE,
     );
     this.cameras.main.startFollow(player);
+
+    //add minimap
+    this.minimap = this.cameras.fromJSON({
+      name: 'minimap',
+      x: 10,
+      y: 10,
+      width: map.widthInPixels * MAP_SCALE * 0.1,
+      height: map.heightInPixels * MAP_SCALE * 0.1,
+      zoom: 0.1,
+      rotation: 0,
+      scrollX: map.widthInPixels * MAP_SCALE * 2,
+      scrollY: map.heightInPixels * MAP_SCALE * 2,
+      roundPixels: false,
+      backgroundColor: false,
+      bounds: {
+        x: 0,
+        y: 0,
+        width: map.widthInPixels * MAP_SCALE,
+        height: map.heightInPixels * MAP_SCALE,
+      },
+    });
+    this.minimap.getCamera('minimap').startFollow(player);
   }
 
   public update() {
