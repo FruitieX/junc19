@@ -19,15 +19,18 @@ export class Player extends Phaser.GameObjects.Sprite {
   public update() {
     if (this.keys.up.isDown) {
       this.body.velocity.y = 100;
-    }
-    if (this.keys.down.isDown) {
+    } else if (this.keys.down.isDown) {
       this.body.velocity.y = -100;
+    } else {
+      this.body.velocity.y = 0;
     }
+
     if (this.keys.left.isDown) {
       this.body.velocity.x = -100;
-    }
-    if (this.keys.right.isDown) {
+    } else if (this.keys.right.isDown) {
       this.body.velocity.x = 100;
+    } else {
+      this.body.velocity.x = 0;
     }
   }
 }
