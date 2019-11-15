@@ -11,12 +11,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.scene.physics.add.existing(this);
   }
 
-  public create() {
-    //this.scene.physics.add.sprite(100, 100, 'player');
-    //this.scene.add.sprite(100, 100, 'player');
-    //this.body.
-  }
-
   public update() {
     if (this.keys.up.isDown) {
       this.setVelocityY(-this.playerVelocity);
