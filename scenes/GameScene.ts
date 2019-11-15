@@ -10,10 +10,6 @@ import DesertTileSet from '../assets/desert.png';
 export class GameScene extends Phaser.Scene {
   gameObjects: Phaser.GameObjects.GameObject[] = [];
 
-  constructor() {
-    super({});
-  }
-
   public preload() {
     this.load.spritesheet('player', PlayerSprite, {
       frameWidth: 128,
@@ -24,22 +20,20 @@ export class GameScene extends Phaser.Scene {
       frameHeight: 8,
     });
 
-    this.load.tilemapTiledJSON('map', DesertTileMap);
+    // TODO: fix tile bleeding https://github.com/sporadic-labs/tile-extruder
+    this.load.tilemapTiledJSON('tilemap', DesertTileMap);
     this.load.image('tileset', DesertTileSet);
   }
 
   public create() {
-    this.cameras.main.setBackgroundColor('#fff');
-    this.gameObjects.push(new Player(this, this.spawnBullet));
-
-    const map = this.make.tilemap({
-      key: 'map',
-      tileWidth: 16,
-      tileHeight: 16,
-    });
+    // initialize tilemap
+    const map = this.make.tilemap({ key: 'tilemap' });
     const tileset = map.addTilesetImage('desert', 'tileset');
     map.createStaticLayer('Terrain Base', tileset, 0, 0).setScale(2);
     map.createStaticLayer('Barriers', tileset, 0, 0).setScale(2);
+
+    // initialize players
+    this.gameObjects.push(new Player(this, this.spawnBullet));
   }
 
   public update() {
