@@ -29,10 +29,18 @@ export class GameScene extends Phaser.Scene {
     const map = this.make.tilemap({ key: 'tilemap' });
     const tileset = map.addTilesetImage('desert', 'tileset');
     map.createStaticLayer('Terrain Base', tileset, 0, 0).setScale(2);
-    map.createStaticLayer('Barriers', tileset, 0, 0).setScale(2);
+    const barriers = map
+      .createStaticLayer('Barriers', tileset, 0, 0)
+      .setScale(2);
+
+    barriers.setCollisionByProperty({ collides: true });
+
+    const player = new Player(this);
+
+    this.physics.add.collider(player, barriers);
 
     // initialize players
-    this.gameObjects.push(new Player(this));
+    this.gameObjects.push(player);
   }
 
   public update() {
