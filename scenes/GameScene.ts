@@ -1,12 +1,11 @@
 import Phaser from 'phaser';
 import { Player } from '../gameObjects/Player';
 import PlayerSprite from '../assets/player.png';
-
 import BulletSprite from '../assets/bullet.png';
-
 import DesertTileMap from '../assets/Desert_Tilemap_800x800.json';
 import DesertTileSet from '../assets/desert.png';
 import Mozart from '../assets/audio/mozart_einekleine.mp3';
+
 export class GameScene extends Phaser.Scene {
   gameObjects: Phaser.GameObjects.GameObject[] = [];
   music?: Phaser.Sound.BaseSound;
@@ -16,7 +15,6 @@ export class GameScene extends Phaser.Scene {
       frameWidth: 128,
       frameHeight: 128,
     });
-
     this.load.audio('music', Mozart);
     this.load.spritesheet('bullet', BulletSprite, {
       frameWidth: 8,
@@ -43,6 +41,7 @@ export class GameScene extends Phaser.Scene {
 
     this.physics.add.collider(player, barriers);
 
+    //Create sound instance
     this.music = this.sound.add('music', {
       mute: false,
       volume: 1,
@@ -53,6 +52,7 @@ export class GameScene extends Phaser.Scene {
       delay: 0,
     });
 
+    // play music
     this.music.play();
     // initialize players
     this.gameObjects.push(player);
