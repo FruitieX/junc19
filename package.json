@@ -20,12 +20,13 @@
   },
   "homepage": "https://github.com/FruitieX/junc19#readme",
   "dependencies": {
-    "parcel-bundler": "^1.12.4",
     "phaser": "^3.20.1"
   },
   "devDependencies": {
     "husky": "^3.0.9",
     "lint-staged": "^9.4.3",
+    "parcel-bundler": "^1.12.4",
+    "parcel-plugin-json-url-loader": "^0.1.2",
     "prettier": "^1.19.1",
     "typescript": "^3.7.2"
   },

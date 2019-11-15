@@ -1,10 +1,23 @@
 import Phaser from 'phaser';
+import { GameScene } from '../scenes/GameScene';
+import { Bullet } from '../gameObjects/Bullet';
+
+interface InputState {
+  fire: boolean;
+}
+
+const initInputState: InputState = {
+  fire: false,
+};
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
+  scene: GameScene = this.scene;
   game = this.scene.game;
   keys = this.scene.input.keyboard.createCursorKeys();
 
   playerVelocity = 500;
+
+  prevInputState = initInputState;
 
   constructor(scene: Phaser.Scene) {
     super(scene, 100, 100, 'player');
@@ -13,6 +26,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   public update() {
+    this.handleInput();
+  }
+
+  private handleInput() {
     const gamepad: Phaser.Input.Gamepad.Gamepad | undefined = this.scene.input
       .gamepad?.pad1;
 
@@ -31,5 +48,23 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     } else {
       this.setVelocityX(0);
     }
+
+    const fireDown = this.keys.space?.isDown || gamepad?.A;
+
+    if (fireDown && !this.prevInputState.fire) {
+      this.shoot();
+    }
+
+    this.prevInputState = {
+      fire: fireDown,
+    };
+  }
+
+  private shoot() {
+    const direction = new Phaser.Math.Vector2(1, 0);
+
+    this.scene.gameObjects.push(
+      new Bullet(this.scene, this.x, this.y, direction),
+    );
   }
 }

@@ -1,14 +1,15 @@
 import Phaser from 'phaser';
-import { Player } from '../Player';
+import { Player } from '../gameObjects/Player';
 import PlayerSprite from '../assets/player.png';
-import Mozart from '../assets/audio/mozart_einekleine.mp3';
 
+import BulletSprite from '../assets/bullet.png';
+
+import DesertTileMap from '../assets/Desert_Tilemap_800x800.json';
+import DesertTileSet from '../assets/desert.png';
+import Mozart from '../assets/audio/mozart_einekleine.mp3';
 export class GameScene extends Phaser.Scene {
-  players: Player[] = [];
+  gameObjects: Phaser.GameObjects.GameObject[] = [];
   music?: Phaser.Sound.BaseSound;
-  constructor() {
-    super({});
-  }
 
   public preload() {
     this.load.spritesheet('player', PlayerSprite, {
@@ -17,12 +18,30 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.load.audio('music', Mozart);
+    this.load.spritesheet('bullet', BulletSprite, {
+      frameWidth: 8,
+      frameHeight: 8,
+    });
+
+    // TODO: fix tile bleeding https://github.com/sporadic-labs/tile-extruder
+    this.load.tilemapTiledJSON('tilemap', DesertTileMap);
+    this.load.image('tileset', DesertTileSet);
   }
 
   public create() {
-    this.cameras.main.setBackgroundColor('#fff');
+    // initialize tilemap
+    const map = this.make.tilemap({ key: 'tilemap' });
+    const tileset = map.addTilesetImage('desert', 'tileset');
+    map.createStaticLayer('Terrain Base', tileset, 0, 0).setScale(2);
+    const barriers = map
+      .createStaticLayer('Barriers', tileset, 0, 0)
+      .setScale(2);
 
-    this.players = [new Player(this)];
+    barriers.setCollisionByProperty({ collides: true });
+
+    const player = new Player(this);
+
+    this.physics.add.collider(player, barriers);
 
     this.music = this.sound.add('music', {
       mute: false,
@@ -35,9 +54,11 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.music.play();
+    // initialize players
+    this.gameObjects.push(player);
   }
 
   public update() {
-    this.players.forEach(player => player.update());
+    this.gameObjects.forEach(o => o.update());
   }
 }
