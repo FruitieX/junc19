@@ -2,7 +2,6 @@ import Phaser from 'phaser';
 import { Player } from '../gameObjects/Player';
 import PlayerSprite from '../assets/player.png';
 import BulletSprite from '../assets/bullet.png';
-import { Bullet } from '../gameObjects/Bullet';
 
 import DesertTileMap from '../assets/Desert_Tilemap_800x800.json';
 import DesertTileSet from '../assets/desert.png';
@@ -33,14 +32,10 @@ export class GameScene extends Phaser.Scene {
     map.createStaticLayer('Barriers', tileset, 0, 0).setScale(2);
 
     // initialize players
-    this.gameObjects.push(new Player(this, this.spawnBullet));
+    this.gameObjects.push(new Player(this));
   }
 
   public update() {
     this.gameObjects.forEach(o => o.update());
   }
-
-  spawnBullet = (x: number, y: number, direction: Phaser.Math.Vector2) => {
-    this.gameObjects.push(new Bullet(this, x, y, direction));
-  };
 }
