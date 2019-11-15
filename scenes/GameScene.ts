@@ -22,5 +22,7 @@ export class GameScene extends Phaser.Scene {
     this.players = [new Player(this)];
   }
 
-  public update() {}
+  public update() {
+    this.players.forEach(player => player.update());
+  }
 }

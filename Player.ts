@@ -1,13 +1,14 @@
 import Phaser from 'phaser';
 
-export class Player extends Phaser.GameObjects.Sprite {
+export class Player extends Phaser.Physics.Arcade.Sprite {
   game = this.scene.game;
   keys = this.scene.input.keyboard.createCursorKeys();
-  body: Phaser.Physics.Arcade.Body = this.body;
+  playerVelocity = 500;
 
   constructor(scene: Phaser.Scene) {
     super(scene, 100, 100, 'player');
     this.scene.add.existing(this);
+    this.scene.physics.add.existing(this);
   }
 
   public create() {
@@ -18,19 +19,19 @@ export class Player extends Phaser.GameObjects.Sprite {
 
   public update() {
     if (this.keys.up.isDown) {
-      this.body.velocity.y = 100;
+      this.setVelocityY(-this.playerVelocity);
     } else if (this.keys.down.isDown) {
-      this.body.velocity.y = -100;
+      this.setVelocityY(this.playerVelocity);
     } else {
-      this.body.velocity.y = 0;
+      this.setVelocityY(0);
     }
 
     if (this.keys.left.isDown) {
-      this.body.velocity.x = -100;
+      this.setVelocityX(-this.playerVelocity);
     } else if (this.keys.right.isDown) {
-      this.body.velocity.x = 100;
+      this.setVelocityX(this.playerVelocity);
     } else {
-      this.body.velocity.x = 0;
+      this.setVelocityX(0);
     }
   }
 }
