@@ -9,6 +9,7 @@ type spawnBulletType = (
 export class Player extends Phaser.Physics.Arcade.Sprite {
   game = this.scene.game;
   keys = this.scene.input.keyboard.createCursorKeys();
+
   playerVelocity = 500;
   spawnBullet?: spawnBulletType;
 
@@ -24,17 +25,20 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   private handleInput() {
-    if (this.keys.up.isDown) {
+    const gamepad: Phaser.Input.Gamepad.Gamepad | undefined = this.scene.input
+      .gamepad?.pad1;
+
+    if (this.keys.up?.isDown || gamepad?.up) {
       this.setVelocityY(-this.playerVelocity);
-    } else if (this.keys.down.isDown) {
+    } else if (this.keys.down?.isDown || gamepad?.down) {
       this.setVelocityY(this.playerVelocity);
     } else {
       this.setVelocityY(0);
     }
 
-    if (this.keys.left.isDown) {
+    if (this.keys.left?.isDown || gamepad?.left) {
       this.setVelocityX(-this.playerVelocity);
-    } else if (this.keys.right.isDown) {
+    } else if (this.keys.right?.isDown || gamepad?.right) {
       this.setVelocityX(this.playerVelocity);
     } else {
       this.setVelocityX(0);
