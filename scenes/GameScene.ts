@@ -28,20 +28,23 @@ export class GameScene extends Phaser.Scene {
 
   public create() {
     // initialize tilemap
+    const MAP_SCALE = 2;
+
     const map = this.make.tilemap({ key: 'tilemap' });
     const tileset = map.addTilesetImage('desert', 'tileset');
-    map.createStaticLayer('Terrain Base', tileset, 0, 0).setScale(2);
+    map.createStaticLayer('Terrain Base', tileset, 0, 0).setScale(MAP_SCALE);
     const barriers = map
       .createStaticLayer('Barriers', tileset, 0, 0)
-      .setScale(2);
+      .setScale(MAP_SCALE);
 
     barriers.setCollisionByProperty({ collides: true });
 
+    // initialize player
     const player = new Player(this);
-
     this.physics.add.collider(player, barriers);
+    this.gameObjects.push(player);
 
-    //Create sound instance
+    // background music
     this.music = this.sound.add('music', {
       mute: false,
       volume: 1,
@@ -51,11 +54,16 @@ export class GameScene extends Phaser.Scene {
       loop: true,
       delay: 0,
     });
-
-    // play music
     this.music.play();
-    // initialize players
-    this.gameObjects.push(player);
+
+    // set player follow on camera
+    this.cameras.main.setBounds(
+      0,
+      0,
+      map.widthInPixels * MAP_SCALE,
+      map.heightInPixels * MAP_SCALE,
+    );
+    this.cameras.main.startFollow(player);
   }
 
   public update() {
