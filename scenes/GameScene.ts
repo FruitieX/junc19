@@ -1,19 +1,22 @@
-import Phaser from 'phaser';
+import Phaser, { NONE } from 'phaser';
 import { Player } from '../gameObjects/Player';
 import PlayerSprite from '../assets/sprites/player.png';
 import BulletSprite from '../assets/bullet.png';
-
 import DesertTileMap from '../assets/Desert_Tilemap_800x800.json';
 import DesertTileSet from '../assets/desert.png';
+import Mozart from '../assets/audio/mozart_einekleine.mp3';
 
 export class GameScene extends Phaser.Scene {
   gameObjects: Phaser.GameObjects.GameObject[] = [];
+  music?: Phaser.Sound.BaseSound;
+  minimap?: Phaser.Cameras.Scene2D.CameraManager;
 
   public preload() {
     this.load.spritesheet('player', PlayerSprite, {
       frameWidth: 78,
       frameHeight: 51,
     });
+    this.load.audio('music', Mozart);
     this.load.spritesheet('bullet', BulletSprite, {
       frameWidth: 8,
       frameHeight: 8,
@@ -26,12 +29,14 @@ export class GameScene extends Phaser.Scene {
 
   public create() {
     // initialize tilemap
+    const MAP_SCALE = 2;
+
     const map = this.make.tilemap({ key: 'tilemap' });
     const tileset = map.addTilesetImage('desert', 'tileset');
-    map.createStaticLayer('Terrain Base', tileset, 0, 0).setScale(2);
+    map.createStaticLayer('Terrain Base', tileset, 0, 0).setScale(MAP_SCALE);
     const barriers = map
       .createStaticLayer('Barriers', tileset, 0, 0)
-      .setScale(2);
+      .setScale(MAP_SCALE);
 
     barriers.setCollisionByProperty({ collides: true });
 
@@ -66,11 +71,51 @@ export class GameScene extends Phaser.Scene {
     });
 
     const player = new Player(this);
-
     this.physics.add.collider(player, barriers);
-
-    // initialize players
     this.gameObjects.push(player);
+
+    // background music
+    this.music = this.sound.add('music', {
+      mute: false,
+      volume: 1,
+      rate: 1.33,
+      detune: 0,
+      seek: 0,
+      loop: true,
+      delay: 0,
+    });
+    this.music.play();
+
+    // set player follow on camera
+    this.cameras.main.setBounds(
+      0,
+      0,
+      map.widthInPixels * MAP_SCALE,
+      map.heightInPixels * MAP_SCALE,
+    );
+    this.cameras.main.startFollow(player);
+
+    //add minimap
+    this.minimap = this.cameras.fromJSON({
+      name: 'minimap',
+      x: 10,
+      y: 10,
+      width: map.widthInPixels * MAP_SCALE * 0.1,
+      height: map.heightInPixels * MAP_SCALE * 0.1,
+      zoom: 0.1,
+      rotation: 0,
+      scrollX: map.widthInPixels * MAP_SCALE * 2,
+      scrollY: map.heightInPixels * MAP_SCALE * 2,
+      roundPixels: false,
+      backgroundColor: false,
+      bounds: {
+        x: 0,
+        y: 0,
+        width: map.widthInPixels * MAP_SCALE,
+        height: map.heightInPixels * MAP_SCALE,
+      },
+    });
+    this.minimap.getCamera('minimap').startFollow(player);
   }
 
   public update() {
