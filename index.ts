@@ -14,6 +14,10 @@ class SimpleGame {
         default: 'arcade',
         arcade: {},
       },
+      input: {
+        gamepad: true,
+        keyboard: true,
+      },
     });
   }
 }
