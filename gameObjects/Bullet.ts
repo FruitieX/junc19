@@ -14,6 +14,7 @@ export class Bullet extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, 'bullet');
     this.scene.add.existing(this);
     this.scene.physics.add.existing(this);
+    this.setScale(0.5);
     this.setVelocity(
       direction.x * bulletVelocity,
       direction.y * bulletVelocity,

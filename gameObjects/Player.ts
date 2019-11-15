@@ -23,11 +23,21 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     super(scene, 100, 100, 'player');
     this.scene.add.existing(this);
     this.scene.physics.add.existing(this);
-    this.anims.play('walk');
+    this.anims.play('idle');
   }
 
   public update() {
     this.handleInput();
+    this.updateAnimations();
+  }
+
+  private updateAnimations() {
+    const currentAnim = this.anims.getCurrentKey();
+    if (this.body.velocity.length() > 0 && currentAnim === 'idle') {
+      this.anims.play('move', true);
+    } else if (currentAnim === 'move') {
+      this.anims.play('idle', true);
+    }
   }
 
   private handleInput() {
@@ -64,6 +74,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private shoot() {
     const direction = new Phaser.Math.Vector2(1, 0);
 
+    this.anims.play('shoot').on('animationcomplete', () => {
+      this.anims.play('idle', true);
+    });
     this.scene.gameObjects.push(
       new Bullet(this.scene, this.x, this.y, direction),
     );
