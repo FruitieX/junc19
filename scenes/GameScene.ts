@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Player } from '../gameObjects/Player';
-import PlayerSprite from '../assets/player.png';
+import PlayerIdleSprite from '../assets/sprites/player_idle.png';
 import BulletSprite from '../assets/bullet.png';
 
 import DesertTileMap from '../assets/Desert_Tilemap_800x800.json';
@@ -10,9 +10,9 @@ export class GameScene extends Phaser.Scene {
   gameObjects: Phaser.GameObjects.GameObject[] = [];
 
   public preload() {
-    this.load.spritesheet('player', PlayerSprite, {
-      frameWidth: 128,
-      frameHeight: 128,
+    this.load.spritesheet('playerIdle', PlayerIdleSprite, {
+      frameWidth: 78,
+      frameHeight: 51,
     });
     this.load.spritesheet('bullet', BulletSprite, {
       frameWidth: 8,
@@ -34,6 +34,16 @@ export class GameScene extends Phaser.Scene {
       .setScale(2);
 
     barriers.setCollisionByProperty({ collides: true });
+
+    this.anims.create({
+      key: 'walk',
+      frames: this.anims.generateFrameNumbers('playerIdle', {
+        start: 0,
+        end: 19,
+      }),
+      frameRate: 15,
+      repeat: -1,
+    });
 
     const player = new Player(this);
 

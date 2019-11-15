@@ -23,6 +23,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     super(scene, 100, 100, 'player');
     this.scene.add.existing(this);
     this.scene.physics.add.existing(this);
+    this.anims.play('walk');
   }
 
   public update() {
