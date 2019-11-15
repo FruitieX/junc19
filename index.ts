@@ -1,4 +1,5 @@
-import Phaser from "phaser";
+import Phaser from 'phaser';
+import { GameScene } from './scenes/GameScene';
 
 class SimpleGame {
   game: Phaser.Game;
@@ -6,7 +7,13 @@ class SimpleGame {
   constructor() {
     this.game = new Phaser.Game({
       width: 1280,
-      height: 720
+      height: 720,
+      scene: [GameScene],
+      type: Phaser.AUTO,
+      physics: {
+        default: 'arcade',
+        arcade: {},
+      },
     });
   }
 }
