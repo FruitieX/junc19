@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import Phaser from "phaser";
 
 class SimpleGame {
   game: Phaser.Game;
