@@ -237,6 +237,11 @@ export class GameScene extends Phaser.Scene {
   public update() {
     this.gameObjects.forEach(o => o.update());
 
+    if (this.deadText) {
+      this.deadText.x = 480 + this.cameras.main.scrollX;
+      this.deadText.y = 360 + this.cameras.main.scrollY;
+    }
+
     if (
       this.mapBounds &&
       this.blocks &&

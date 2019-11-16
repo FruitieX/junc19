@@ -17,7 +17,7 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
   if (isInitMsg(message)) {
     gameScene.ws!.setPlayerData(message.data.playerId, message.data.team);
     gameScene.ws!.startServerUpdateLoop();
-    gameScene.player!.addToMap(message.data.team);
+    gameScene.player!.spawn(message.data.team);
 
     return;
   }
