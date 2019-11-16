@@ -91,7 +91,11 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
         break;
       }
       case 'Return': {
-        flag.setPosition(flag.basePos.x, flag.basePos.y);
+        flag.returnHome();
+        break;
+      }
+      case 'Capture': {
+        flag.returnHome();
         break;
       }
       default: {

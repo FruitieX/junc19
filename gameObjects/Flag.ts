@@ -40,22 +40,6 @@ export class Flag extends Phaser.Physics.Arcade.Sprite {
     this.scene.physics.add.overlap(this, scene.player!, this.handleOverlap);
   }
 
-  private handleOverlap = () => {
-    if (this.isEnemyFlag) {
-      if (
-        !this.heldByLocalPlayer &&
-        this.heldByPlayerId === undefined &&
-        !this.gameScene.player!.isDead()
-      ) {
-        this.pickupEnemyFlag();
-      }
-    } else {
-      if (!this.isHome) {
-        this.returnFriendlyFlag();
-      }
-    }
-  };
-
   private emitFlagMsg(event: FlagStateMsgEvent) {
     const msg: FlagStateMsg = {
       kind: 'FlagState',
@@ -66,6 +50,47 @@ export class Flag extends Phaser.Physics.Arcade.Sprite {
       },
     };
     this.gameScene.ws!.emitMsg(msg);
+  }
+
+  private handleOverlap = () => {
+    if (this.isEnemyFlag) {
+      if (
+        !this.heldByLocalPlayer &&
+        this.heldByPlayerId === undefined &&
+        !this.gameScene.player!.isDead()
+      ) {
+        this.pickupEnemyFlag();
+      }
+    } else {
+      if (!this.isHome && !this.heldByPlayerId) {
+        this.returnFriendlyFlag();
+      } else {
+        const enemyFlag =
+          this.flagTeam === 1 ? this.gameScene.flag2! : this.gameScene.flag1!;
+
+        if (enemyFlag.heldByLocalPlayer) {
+          console.log('capture enemy flag');
+
+          const msg: FlagStateMsg = {
+            kind: 'FlagState',
+            data: {
+              event: 'Capture',
+              flagTeam: enemyFlag.flagTeam,
+              playerId: this.gameScene.ws?.playerId!,
+            },
+          };
+          this.gameScene.ws!.emitMsg(msg);
+          enemyFlag.returnHome();
+        }
+      }
+    }
+  };
+
+  public returnHome() {
+    this.heldByLocalPlayer = false;
+    this.heldByPlayerId = undefined;
+    this.isHome = true;
+    this.setPosition(this.basePos.x, this.basePos.y);
   }
 
   private pickupEnemyFlag() {
@@ -88,14 +113,9 @@ export class Flag extends Phaser.Physics.Arcade.Sprite {
     //   this.returnCollider.destroy();
     // }
 
-    this.setPosition(this.basePos.x, this.basePos.y);
+    this.returnHome();
 
     this.emitFlagMsg('Return');
-  }
-
-  private captureEnemyFlag() {
-    console.log('capture enemy flag');
-    this.emitFlagMsg('Capture');
   }
 
   public dropEnemyFlag() {
