@@ -4,7 +4,7 @@ import PlayerSprite from '../assets/sprites/player.png';
 import BloodSprite from '../assets/sprites/blood.png';
 import BulletSprite from '../assets/bullet.png';
 import DesertTileMap from '../assets/Dust2.json';
-import DesertTileSet from '../assets/desert.png';
+import DesertTileSet from '../assets/extruded_desert.png';
 import { Opponent } from '../gameObjects/Opponent';
 import Mozart from '../assets/audio/mozart_einekleine.mp3';
 import GunShot from '../assets/audio/silencer.wav';
@@ -187,27 +187,29 @@ export class GameScene extends Phaser.Scene {
       map.heightInPixels * MAP_SCALE,
     );
 
-    //add minimap
+    //add minimap RIP
+    /*
     this.minimap = this.cameras.fromJSON({
       name: 'minimap',
       x: 10,
       y: 10,
-      width: map.widthInPixels * MAP_SCALE * 0.1,
-      height: map.heightInPixels * MAP_SCALE * 0.1,
+      width: map.widthInPixels * 0.1,
+      height: map.heightInPixels  * 0.1,
       zoom: 0.1,
       rotation: 0,
-      scrollX: map.widthInPixels * MAP_SCALE * 2,
-      scrollY: map.heightInPixels * MAP_SCALE * 2,
+      scrollX: map.widthInPixels,
+      scrollY: map.heightInPixels,
       roundPixels: false,
       backgroundColor: false,
       bounds: this.mapBounds,
     });
     this.minimap.getCamera('minimap').startFollow(player);
-
+    this.minimap.getCamera('minimap').setBackgroundColor('rgba(0,0,0,0.8)');
     // Locks pointer on mousedown
     this.game.canvas.addEventListener('mousedown', () => {
       this.game.input.mouse.requestPointerLock();
     });
+*/
 
     // Move reticle upon locked pointer move
     this.input.on(

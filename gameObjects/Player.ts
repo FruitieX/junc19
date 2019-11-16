@@ -26,6 +26,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   prevInputState = initInputState;
   gameScene: GameScene;
   team?: TeamType;
+  healtbar?: Phaser.GameObjects.Rectangle;
 
   constructor(scene: GameScene) {
     super(scene, 100, 100, 'player');
@@ -35,8 +36,12 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.scene.physics.add.existing(this);
     this.anims.play('idle');
   }
-
   public update() {
+    if (this.healtbar === undefined) {
+      this.healtbar = this.scene.add.rectangle(0, 0, 50, 10, 0xff0000);
+    }
+    this.healtbar.setPosition(this.x, this.y - 20);
+    this.healtbar.setSize((this.hp / 50) * 50, 10);
     this.handleInput();
     this.updateAnimations();
     this.handleRespawn();
