@@ -12,6 +12,7 @@ export class GameScene extends Phaser.Scene {
   minimap?: Phaser.Cameras.Scene2D.CameraManager;
   game: Phaser.Game;
   mousePosition?: Phaser.Math.Vector2;
+  barriers?: Phaser.Tilemaps.StaticTilemapLayer;
 
   constructor(game: Phaser.Game) {
     super(game);
@@ -41,11 +42,11 @@ export class GameScene extends Phaser.Scene {
     const map = this.make.tilemap({ key: 'tilemap' });
     const tileset = map.addTilesetImage('desert', 'tileset');
     map.createStaticLayer('Terrain Base', tileset, 0, 0).setScale(MAP_SCALE);
-    const barriers = map
+    this.barriers = map
       .createStaticLayer('Barriers', tileset, 0, 0)
       .setScale(MAP_SCALE);
 
-    barriers.setCollisionByProperty({ collides: true });
+    this.barriers.setCollisionByProperty({ collides: true });
 
     this.anims.create({
       key: 'idle',
@@ -78,7 +79,7 @@ export class GameScene extends Phaser.Scene {
     });
 
     const player = new Player(this);
-    this.physics.add.collider(player, barriers);
+    this.physics.add.collider(player, this.barriers);
     this.gameObjects.push(player);
 
     // background music

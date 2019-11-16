@@ -15,7 +15,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   game = this.scene.game;
   keys = this.scene.input.keyboard.createCursorKeys();
 
-  playerVelocity = 500;
+  playerVelocity = 250;
 
   prevInputState = initInputState;
 
