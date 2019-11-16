@@ -11,6 +11,7 @@ import {
   isHitMsg,
   DisconnectMsg,
   isFlagStateMsg,
+  GameStateMsg,
 } from '../typings/ws-messages';
 
 export interface TrackablePlayerData {
@@ -42,6 +43,40 @@ const wss = new WebSocket.Server({ server });
 
 var connections: Connection[] = [];
 
+const maxScore = 5;
+interface GameState {
+  team1Score: number;
+  team2Score: number;
+  gameActive: boolean;
+  maxScore: number;
+}
+const initialState: GameState = {
+  team1Score: 0,
+  team2Score: 0,
+  gameActive: true,
+  maxScore,
+};
+
+let state = { ...initialState };
+
+const broadcastGameState = () => {
+  const msg: GameStateMsg = {
+    kind: 'GameState',
+    data: state,
+  };
+  broadcast(msg);
+};
+
+const reset = () => {
+  state = { ...initialState };
+  broadcastGameState();
+};
+
+const endGame = (winningTeam: 1 | 2) => {
+  state.gameActive = false;
+  setTimeout(reset, 5000);
+};
+
 wss.on('connection', (ws: WebSocket) => {
   //connection is up, let's add a simple simple
 
@@ -52,6 +87,11 @@ wss.on('connection', (ws: WebSocket) => {
 
   const initMsg: InitMsg = { kind: 'Init', data: { playerId: playerId, team } };
   ws.send(JSON.stringify(initMsg));
+  const msg: GameStateMsg = {
+    kind: 'GameState',
+    data: state,
+  };
+  ws.send(JSON.stringify(msg));
 
   ws.on('message', (data: string) => {
     //log the received message and send it back to the client
@@ -88,6 +128,24 @@ wss.on('connection', (ws: WebSocket) => {
       if (it) {
         broadcast(message, it.id);
       }
+
+      if (message.data.event === 'Capture') {
+        if (message.data.flagTeam === 1) {
+          state.team2Score += 1;
+
+          if (state.team2Score >= maxScore) {
+            endGame(2);
+          }
+        } else {
+          state.team1Score += 1;
+
+          if (state.team1Score >= maxScore) {
+            endGame(1);
+          }
+        }
+
+        broadcastGameState();
+      }
     }
   });
 
@@ -123,7 +181,7 @@ setInterval(() => {
   });
 }, 1000 / 20);
 
-const broadcast = (message: WsMessage, sender: string) => {
+const broadcast = (message: WsMessage, sender?: string) => {
   connections
     .filter(c => c.id !== sender)
     .forEach(c => {

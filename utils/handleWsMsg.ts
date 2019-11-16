@@ -6,6 +6,7 @@ import {
   isBulletSpawnMsg,
   isAllPlayerPosUpdateMsg,
   isFlagStateMsg,
+  isGameStateMsg,
 } from '../typings/ws-messages';
 import { GameScene } from '../scenes/GameScene';
 import { Opponent } from '../gameObjects/Opponent';
@@ -127,6 +128,10 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
         console.log('unhandled flag state msg:', message);
       }
     }
+  }
+
+  if (isGameStateMsg(message)) {
+    gameScene.updateGameState(message.data);
   }
 
   console.log('unhandled msg', message);

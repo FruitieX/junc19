@@ -95,10 +95,10 @@ export class Flag extends Phaser.Physics.Arcade.Sprite {
   };
 
   public returnHome() {
+    this.setPosition(this.basePos.x, this.basePos.y);
     this.heldByLocalPlayer = false;
     this.heldByPlayerId = undefined;
     this.isHome = true;
-    this.setPosition(this.basePos.x, this.basePos.y);
   }
 
   private pickupEnemyFlag() {

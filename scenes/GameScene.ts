@@ -12,7 +12,12 @@ import GunShot from '../assets/audio/silencer.wav';
 import { Rectangle } from '../2d-visibility/rectangle';
 import { loadMap } from '../2d-visibility/load-map';
 import { calculateVisibility } from '../2d-visibility/visibility';
-import { OpponentPostion, team1Name, team2Name } from '../typings/ws-messages';
+import {
+  OpponentPostion,
+  team1Name,
+  team2Name,
+  GameState,
+} from '../typings/ws-messages';
 import { WebSocketHandler } from '../utils/WebSocketHandler';
 import { Flag } from '../gameObjects/Flag';
 
@@ -40,12 +45,26 @@ export class GameScene extends Phaser.Scene {
   statusTextTime = new Date().getTime();
   statusText?: Phaser.GameObjects.Text;
 
+  scoreText?: Phaser.GameObjects.Text;
+
   online: Boolean = false;
   flag1?: Flag;
   flag2?: Flag;
+  gameState: GameState;
+
+  gameWasActive: boolean;
 
   constructor() {
     super({ key: 'gameScene' });
+
+    this.gameState = {
+      gameActive: true,
+      team1Score: 0,
+      team2Score: 0,
+      maxScore: 5,
+    };
+
+    this.gameWasActive = true;
   }
 
   init(online: Boolean) {
@@ -76,6 +95,26 @@ export class GameScene extends Phaser.Scene {
     // TODO: fix tile bleeding https://github.com/sporadic-labs/tile-extruder
     this.load.tilemapTiledJSON('tilemap', DesertTileMap);
     this.load.image('tileset', DesertTileSet);
+  }
+
+  public updateGameState(state: GameState) {
+    this.gameState = state;
+
+    if (this.gameState.team1Score >= this.gameState.maxScore) {
+      if (this.player!.team === team1Name) {
+        this.setStatusText('Your team wins!');
+      } else {
+        this.setStatusText('Enemy team wins!');
+      }
+    }
+
+    if (this.gameState.team2Score >= this.gameState.maxScore) {
+      if (this.player!.team === team2Name) {
+        this.setStatusText('Your team wins!');
+      } else {
+        this.setStatusText('Enemy team wins!');
+      }
+    }
   }
 
   public create() {
@@ -317,6 +356,12 @@ export class GameScene extends Phaser.Scene {
     this.statusText.scrollFactorX = 0;
     this.statusText.scrollFactorY = 0;
 
+    this.scoreText = this.add.text(40, 40, '');
+    this.scoreText.setColor('#000');
+    this.scoreText.setFontSize(30);
+    this.scoreText.scrollFactorX = 0;
+    this.scoreText.scrollFactorY = 0;
+
     if (this.online.valueOf()) {
       this.ws = new WebSocketHandler(this, 'ws://23.101.58.18:9000');
     } else {
@@ -330,13 +375,37 @@ export class GameScene extends Phaser.Scene {
   }
 
   public update() {
-    this.gameObjects.forEach(o => o.update());
-
     if (new Date().getTime() - this.statusTextTime < 3000) {
       this.statusText?.setVisible(true);
     } else {
       this.statusText?.setVisible(false);
     }
+
+    // don't update objects if game is not active
+    if (!this.gameState.gameActive) {
+      this.gameWasActive = false;
+      return;
+    }
+
+    // if game just got restarted, restart
+    if (!this.gameWasActive && this.gameState.gameActive) {
+      this.gameWasActive = true;
+      // this.gameObjects.forEach(o => o.destroy());
+      // this.gameObjects = [];
+      this.player?.spawn(this.player!.team!);
+    }
+
+    const team1Score = this.gameState.team1Score;
+    const team2Score = this.gameState.team2Score;
+
+    this.scoreText?.setText([
+      `Your team: ${this.player!.team === team1Name ? team1Score : team2Score}`,
+      `Enemy team: ${
+        this.player!.team === team1Name ? team2Score : team1Score
+      }`,
+    ]);
+
+    this.gameObjects.forEach(o => o.update());
 
     if (
       this.mapBounds &&
