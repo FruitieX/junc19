@@ -215,6 +215,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   public takeDamage(dmg: number) {
     if (this.isDead()) return;
+    this.anims.play('blood');
 
     this.hp -= dmg;
     if (this.isDead()) {

@@ -5,13 +5,11 @@ import BulletSprite from '../assets/bullet.png';
 import DesertTileMap from '../assets/Dust2.json';
 import DesertTileSet from '../assets/extruded_desert.png';
 import { Opponent } from '../gameObjects/Opponent';
-import { TrackableObjects } from '../server/Server';
 import Mozart from '../assets/audio/mozart_einekleine.mp3';
+import GunShot from '../assets/audio/silencer.wav';
 import { Rectangle } from '../2d-visibility/rectangle';
 import { loadMap } from '../2d-visibility/load-map';
 import { calculateVisibility } from '../2d-visibility/visibility';
-import { handleWsMsg } from '../utils/handleWsMsg';
-import { PlayerPosUpdateMsg } from '../typings/ws-messages';
 import { WebSocketHandler } from '../utils/WebSocketHandler';
 
 type OpponentPostion = {
@@ -38,6 +36,7 @@ export class GameScene extends Phaser.Scene {
   public opponentMap: { [id: string]: OpponentPostion } = {};
   player?: Player;
   music?: Phaser.Sound.BaseSound;
+  gunShotSound?: Phaser.Sound.BaseSound;
   minimap?: Phaser.Cameras.Scene2D.CameraManager;
   mousePosition?: Phaser.Math.Vector2;
   barriers?: Phaser.Tilemaps.StaticTilemapLayer;
@@ -67,6 +66,7 @@ export class GameScene extends Phaser.Scene {
       frameHeight: 51,
     });
     this.load.audio('music', Mozart);
+    this.load.audio('gunSound', GunShot);
     this.load.spritesheet('bullet', BulletSprite, {
       frameWidth: 8,
       frameHeight: 8,
@@ -102,10 +102,20 @@ export class GameScene extends Phaser.Scene {
     this.water.setCollisionByProperty({ collides: true });
 
     this.anims.create({
-      key: 'idle',
+      key: 'blood',
       frames: this.anims.generateFrameNumbers('player', {
         start: 0,
-        end: 19,
+        end: 2,
+      }),
+      frameRate: 15,
+      repeat: 0,
+    });
+
+    this.anims.create({
+      key: 'idle',
+      frames: this.anims.generateFrameNumbers('player', {
+        start: 3,
+        end: 22,
       }),
       frameRate: 15,
       repeat: -1,
@@ -114,8 +124,8 @@ export class GameScene extends Phaser.Scene {
     this.anims.create({
       key: 'move',
       frames: this.anims.generateFrameNumbers('player', {
-        start: 20,
-        end: 39,
+        start: 23,
+        end: 42,
       }),
       frameRate: 15,
       repeat: -1,
@@ -124,8 +134,8 @@ export class GameScene extends Phaser.Scene {
     this.anims.create({
       key: 'shoot',
       frames: this.anims.generateFrameNumbers('player', {
-        start: 40,
-        end: 42,
+        start: 43,
+        end: 45,
       }),
       frameRate: 15,
       repeat: 0,
@@ -145,7 +155,7 @@ export class GameScene extends Phaser.Scene {
     // background music
     this.music = this.sound.add('music', {
       mute: false,
-      volume: 1,
+      volume: 0.2,
       rate: 1.33,
       detune: 0,
       seek: 0,
@@ -153,6 +163,11 @@ export class GameScene extends Phaser.Scene {
       delay: 0,
     });
     this.music.play();
+
+    this.gunShotSound = this.sound.add('gunSound', {
+      mute: false,
+      volume: 1,
+    });
 
     // set player follow on camera
     this.cameras.main.setBounds(
@@ -189,10 +204,11 @@ export class GameScene extends Phaser.Scene {
     this.minimap.getCamera('minimap').startFollow(player);
     this.minimap.getCamera('minimap').setBackgroundColor('rgba(0,0,0,0.8)');
     // Locks pointer on mousedown
+
+*/
     this.game.canvas.addEventListener('mousedown', () => {
       this.game.input.mouse.requestPointerLock();
     });
-*/
 
     // Move reticle upon locked pointer move
     this.input.on(
