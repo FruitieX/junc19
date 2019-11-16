@@ -47,6 +47,7 @@ export class GameScene extends Phaser.Scene {
   mapBounds?: Rectangle;
   visibilityOverlay: Phaser.GameObjects.Graphics;
   visibilityMask: Phaser.GameObjects.Graphics;
+  gameObjectContainer: Phaser.GameObjects.Container;
 
   constructor() {
     super({ key: 'gameScene' });
@@ -119,6 +120,7 @@ export class GameScene extends Phaser.Scene {
 
     this.visibilityOverlay = this.make.graphics({});
     this.visibilityMask = this.make.graphics({});
+    this.gameObjectContainer = this.add.container(0, 0);
 
     const player = new Player(this);
     this.player = player;
@@ -241,11 +243,14 @@ export class GameScene extends Phaser.Scene {
     );
 
     const mask = this.visibilityMask.createGeometryMask();
-    mask.setInvertAlpha(true);
+    const invertedMask = this.visibilityMask.createGeometryMask();
+    invertedMask.setInvertAlpha(true);
     this.visibilityOverlay.fillStyle(0, 0.5);
     this.visibilityOverlay.fillRect(0, 0, 10000, 10000);
-    this.visibilityOverlay.setMask(mask);
+    this.visibilityOverlay.setMask(invertedMask);
     this.add.existing(this.visibilityOverlay);
+
+    this.gameObjectContainer.setMask(mask);
   }
 
   private startUpdating() {
