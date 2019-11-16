@@ -6,21 +6,25 @@ const bulletVelocity = 1000;
 
 export class Bullet extends Phaser.Physics.Arcade.Sprite {
   gameScene?: GameScene;
-  local: boolean;
+
+  /**
+   * Don't let remote bullets emit hit events
+   */
+  isLocalBullet: boolean;
 
   constructor(
     scene: GameScene,
     x: number,
     y: number,
     direction: Phaser.Math.Vector2,
-    local: boolean, // remote bullets don't emit any events
+    isLocalBullet: boolean,
   ) {
     super(scene, x, y, 'bullet');
 
     this.scene = scene;
     this.gameScene = scene;
 
-    this.local = local;
+    this.isLocalBullet = isLocalBullet;
 
     scene.gameObjectContainer!.add(this);
     this.scene.physics.add.existing(this);
@@ -34,6 +38,15 @@ export class Bullet extends Phaser.Physics.Arcade.Sprite {
       direction.x * bulletVelocity,
       direction.y * bulletVelocity,
     );
+
+    // collide remote bullets against local Player object
+    if (!isLocalBullet) {
+      this.scene.physics.add.collider(
+        this,
+        this.gameScene!.player!,
+        this.onCollide,
+      );
+    }
   }
 
   private onCollide: ArcadePhysicsCallback = (object1, object2) => {
@@ -41,7 +54,7 @@ export class Bullet extends Phaser.Physics.Arcade.Sprite {
       obj => obj instanceof Opponent,
     ) as any;
 
-    if (opponent && this.local) {
+    if (opponent && this.isLocalBullet) {
       this.gameScene!.ws!.emitMsg({
         kind: 'Hit',
         data: {
