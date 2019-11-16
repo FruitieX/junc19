@@ -179,7 +179,7 @@ setInterval(() => {
     };
     it.socket.send(JSON.stringify(message));
   });
-}, 1000 / 100);
+}, 1000 / 60);
 
 const broadcast = (message: WsMessage, sender?: string) => {
   connections
