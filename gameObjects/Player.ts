@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { GameScene } from '../scenes/GameScene';
 import { Bullet } from '../gameObjects/Bullet';
-import { BulletSpawnMsg, teamType as TeamType } from '../typings/ws-messages';
+import { BulletSpawnMsg, TeamType } from '../typings/ws-messages';
+import { Flag } from './Flag';
 
 interface InputState {
   fire: boolean;
@@ -87,7 +88,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (team === 'Team New') {
       this.setPosition(10 * 32, 50 * 32);
     } else {
-      this.setPosition(83 * 32, 50 * 32);
+      // this.setPosition(83 * 32, 50 * 32);
+      this.setPosition(15 * 32, 50 * 32);
     }
 
     this.isAddedToMap = true;
@@ -227,8 +229,21 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.hp -= dmg;
     if (this.isDead()) {
-      console.log('you died :(');
-      this.respawnAtTime = new Date().getTime() + 5000;
+      this.die();
+    }
+  }
+
+  public die() {
+    console.log('you died :(');
+    this.respawnAtTime = new Date().getTime() + 5000;
+
+    const heldFlag: Flag | undefined = this.gameScene!.gameObjects!.filter(
+      obj => obj instanceof Flag,
+    ).find((flag: any) => (flag as Flag).heldByLocalPlayer) as any;
+    console.log('heldFlag', heldFlag);
+
+    if (heldFlag) {
+      heldFlag.dropEnemyFlag();
     }
   }
 }
