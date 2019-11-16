@@ -178,6 +178,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         bulletInitPositionY,
         direction,
         true,
+        this.scene.ws?.playerId!,
       ),
     );
 
@@ -200,6 +201,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
           x: direction.x,
           y: direction.y,
         },
+        ownerId: this.scene.ws?.playerId!,
       },
     };
 

@@ -71,6 +71,7 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
           message.data.direction.y,
         ),
         false,
+        message.data.ownerId,
       ),
     );
 

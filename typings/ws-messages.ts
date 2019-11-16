@@ -65,6 +65,7 @@ export interface BulletSpawnMsg {
     x: number;
     y: number;
     direction: Vector;
+    ownerId: string;
   };
 }
 
