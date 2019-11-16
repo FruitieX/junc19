@@ -5,6 +5,7 @@ import {
   InitMsg,
   WsMessage,
   isPlayerPosUpdateMsg,
+  AllPlayerPosUpdateMsg,
 } from '../typings/ws-messages';
 
 export interface trackablePlayerData {
@@ -40,7 +41,11 @@ wss.on('connection', (ws: WebSocket) => {
 
     let message = JSON.parse(data) as WsMessage;
     if (isPlayerPosUpdateMsg(message)) {
-      trackableObjects[message.playerUpdate.id] = message.playerUpdate.pos;
+      trackableObjects[message.data.id] = {
+        x: message.data.pos.x,
+        y: message.data.pos.y,
+        rotation: message.data.rot,
+      };
     }
   });
   ws.on('close', function(reasonCode, description) {
@@ -59,14 +64,13 @@ wss.on('connection', (ws: WebSocket) => {
 });
 setInterval(() => {
   connections.forEach(it => {
-    for (let it in trackableObjects) {
-      let pos = trackableObjects[it];
-    }
-    it.socket.send(
-      JSON.stringify({
-        update: trackableObjects,
-      }),
-    );
+    const message: AllPlayerPosUpdateMsg = {
+      kind: 'AllPlayerPosUpdate',
+      data: {
+        pos: trackableObjects,
+      },
+    };
+    it.socket.send(JSON.stringify(message));
   });
 }, 1000 / 20);
 
