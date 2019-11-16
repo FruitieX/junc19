@@ -32,7 +32,22 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
   }
 
   if (isPlayerPosUpdateMsg(message)) {
-    console.log('unhandled msg', message);
+    const updatedPositions = message.data.pos;
+    for (const key in updatedPositions) {
+      // ignore our own playerId
+      if (key !== gameScene.playerId) {
+        if (gameScene.opponentMap[key] === undefined) {
+          gameScene.gameObjects.push(
+            new Opponent(
+              gameScene,
+              () => undefined /* TODO this.spawnBullet */,
+              key,
+            ),
+          );
+        }
+        gameScene.opponentMap[key] = updatedPositions[key];
+      }
+    }
   }
 
   if (isHitMsg(message)) {
