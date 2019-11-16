@@ -4,43 +4,70 @@ import {
   isDisconnectMsg,
   isPlayerPosUpdateMsg,
   isHitMsg,
+  isBulletSpawnMsg,
 } from '../typings/ws-messages';
 import { GameScene } from '../scenes/GameScene';
+import { Opponent } from '../gameObjects/Opponent';
+import { Bullet } from '../gameObjects/Bullet';
 
 export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
   var message = JSON.parse(ev.data) as WsMessage;
 
   if (isInitMsg(message)) {
-    console.log('unhandled msg', message);
+    gameScene.setPlayerId(message.data.playerId);
+    gameScene.startServerUpdateLoop();
   }
 
   if (isDisconnectMsg(message)) {
-    console.log('unhandled msg', message);
+    const playerId = message.data.playerId;
+
+    let op = gameScene.gameObjects.find(
+      go => go instanceof Opponent && (go as Opponent).id === playerId,
+    );
+    if (op !== undefined) {
+      gameScene.gameObjects = gameScene.gameObjects.filter(it => it !== op);
+      delete gameScene.opponentMap[playerId];
+      op.destroy();
+    }
   }
 
   if (isPlayerPosUpdateMsg(message)) {
-    console.log('unhandled msg', message);
+    const updatedPositions = message.data.pos;
+    for (const key in updatedPositions) {
+      // ignore our own playerId
+      if (key !== gameScene.playerId) {
+        if (gameScene.opponentMap[key] === undefined) {
+          gameScene.gameObjects.push(
+            new Opponent(
+              gameScene,
+              () => undefined /* TODO this.spawnBullet */,
+              key,
+            ),
+          );
+        }
+        gameScene.opponentMap[key] = updatedPositions[key];
+      }
+    }
   }
 
   if (isHitMsg(message)) {
     console.log('unhandled msg', message);
   }
 
-  // if (message.id !== undefined) {
-  //   this.id = message.id;
-  //   this.startUpdating();
-  // }
-  // if (message.dissconnected !== undefined) {
-  //   let op = this.gameObjects.find(
-  //     go =>
-  //       go instanceof Opponent && (go as Opponent).id === message.dissconnected,
-  //   );
-  //   if (op !== undefined) {
-  //     this.gameObjects = this.gameObjects.filter(it => it !== op);
-  //     delete this.opponentMap[message.dissconnected];
-  //     op.destroy;
-  //   }
-  // }
+  if (isBulletSpawnMsg(message)) {
+    gameScene.gameObjects.push(
+      new Bullet(
+        gameScene,
+        message.data.x,
+        message.data.y,
+        new Phaser.Math.Vector2(
+          message.data.direction.x,
+          message.data.direction.y,
+        ),
+      ),
+    );
+  }
+
   // if (this.id !== undefined && message.update !== undefined) {
   //   for (let key in message.update) {
   //     if (key !== this.id) {

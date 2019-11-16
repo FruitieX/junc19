@@ -34,9 +34,9 @@ export interface PlayerPosUpdateMsg {
   data: {
     id: string;
     pos: { x: number; y: number };
+    rot: number;
   };
 }
-
 export const isPlayerPosUpdateMsg = (
   msg: WsMessage,
 ): msg is PlayerPosUpdateMsg =>
@@ -49,13 +49,30 @@ export interface HitMsg {
     dmg: number;
   };
 }
-
 export const isHitMsg = (msg: WsMessage): msg is HitMsg =>
   (msg as HitMsg).kind === 'Hit';
+
+interface Vector {
+  x: number;
+  y: number;
+}
+
+export interface BulletSpawnMsg {
+  kind: 'SpawnBullet';
+  data: {
+    x: number;
+    y: number;
+    direction: Vector;
+  };
+}
+
+export const isBulletSpawnMsg = (msg: WsMessage): msg is BulletSpawnMsg =>
+  (msg as BulletSpawnMsg).kind === 'SpawnBullet';
 
 export type WsMessage =
   | InitMsg
   | DisconnectMsg
   | PlayerPosUpdateMsg
   | HitMsg
-  | AllPlayerPosUpdateMsg;
+  | AllPlayerPosUpdateMsg
+  | BulletSpawnMsg;

@@ -1,7 +1,11 @@
 import express from 'express';
 import * as http from 'http';
 import * as WebSocket from 'ws';
-import { InitMsg } from '../typings/ws-messages';
+import {
+  InitMsg,
+  WsMessage,
+  isPlayerPosUpdateMsg,
+} from '../typings/ws-messages';
 
 export interface trackablePlayerData {
   x: number;
@@ -33,15 +37,9 @@ wss.on('connection', (ws: WebSocket) => {
   ws.on('message', (data: string) => {
     //log the received message and send it back to the client
     //check if there are other connections
-<<<<<<< Updated upstream
-    let message = JSON.parse(data) as {
-      playerUpdate: { id: string; pos: trackablePlayerData };
-    };
-    console.log(message.playerUpdate.id);
-=======
-    let message = JSON.parse(data);
->>>>>>> Stashed changes
-    if (message.playerUpdate !== undefined) {
+
+    let message = JSON.parse(data) as WsMessage;
+    if (isPlayerPosUpdateMsg(message)) {
       trackableObjects[message.playerUpdate.id] = message.playerUpdate.pos;
     }
   });
