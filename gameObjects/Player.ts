@@ -15,6 +15,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   game = this.scene.game;
   keys = this.scene.input.keyboard.createCursorKeys();
 
+  hp = 100;
+
   playerVelocity = 250;
 
   prevInputState = initInputState;
@@ -130,5 +132,13 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       },
       this,
     );
+  }
+
+  public takeDamage(dmg: number) {
+    this.hp -= dmg;
+    if (this.hp < 0) {
+      console.log('you died :(');
+      this.destroy();
+    }
   }
 }

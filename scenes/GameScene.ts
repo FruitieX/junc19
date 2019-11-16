@@ -10,17 +10,18 @@ import Mozart from '../assets/audio/mozart_einekleine.mp3';
 import { Rectangle } from '../2d-visibility/rectangle';
 import { loadMap } from '../2d-visibility/load-map';
 import { calculateVisibility } from '../2d-visibility/visibility';
+import { handleWsMsg } from '../utils/handleWsMsg';
 
 type OpponentPostion = {
   x: number;
   y: number;
 };
 
-type message = {
-  id?: string;
-  update?: trackableObjects;
-  dissconnected?: string;
-};
+// type Message = {
+//   id?: string;
+//   update?: trackableObjects;
+//   dissconnected?: string;
+// };
 
 export class GameScene extends Phaser.Scene {
   gameObjects: Phaser.GameObjects.GameObject[] = [];
@@ -131,35 +132,8 @@ export class GameScene extends Phaser.Scene {
     this.wsc.addEventListener('open', ev => {
       console.log('conneted');
     });
-    this.wsc.addEventListener('message', ev => {
-      var message = JSON.parse(ev.data) as message;
-      if (message.id !== undefined) {
-        this.id = message.id;
-        this.startUpdating();
-      }
-      if (message.dissconnected !== undefined) {
-        let op = this.gameObjects.find(
-          go =>
-            go instanceof Opponent &&
-            (go as Opponent).id === message.dissconnected,
-        );
-        if (op !== undefined) {
-          this.gameObjects = this.gameObjects.filter(it => it !== op);
-          delete this.opponentMap[message.dissconnected];
-          op.destroy;
-        }
-      }
-      if (this.id !== undefined && message.update !== undefined) {
-        for (let key in message.update) {
-          if (key !== this.id) {
-            if (this.opponentMap[key] === undefined) {
-              this.gameObjects.push(new Opponent(this, this.spawnBullet, key));
-            }
-            this.opponentMap[key] = message.update[key];
-          }
-        }
-      }
-    });
+    this.wsc.addEventListener('message', handleWsMsg(this));
+
     // background music
     this.music = this.sound.add('music', {
       mute: false,
