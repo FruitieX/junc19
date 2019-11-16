@@ -126,14 +126,11 @@ const genId = (): string => {
     .substring(7);
 };
 const getTeam = (): teamType => {
-  const teamGretaTeamSize = connections.filter(
-    c => c.teamId === 'Greta Thunberg',
-  ).length;
-  const teamTrumpTeamSize = connections.filter(c => c.teamId === 'Donald Trump')
+  const teamGretaTeamSize = connections.filter(c => c.teamId === 'Team New')
     .length;
-  return teamGretaTeamSize <= teamTrumpTeamSize
-    ? 'Greta Thunberg'
-    : 'Donald Trump';
+  const teamTrumpTeamSize = connections.filter(c => c.teamId === 'Team Old')
+    .length;
+  return teamGretaTeamSize <= teamTrumpTeamSize ? 'Team New' : 'Team Old';
 };
 //start our server
 server.listen(9000, () => {

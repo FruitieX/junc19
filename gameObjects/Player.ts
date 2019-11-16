@@ -74,7 +74,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     return { x: this.x, y: this.y, rotation: this.rotation };
   }
   public addToMap(team: teamType) {
-    if (team === 'Greta Thunberg') {
+    console.log(`You are joining ${team}`);
+    if (team === 'Team New') {
       this.setPosition(10 * 32, 50 * 32);
     } else {
       this.setPosition(83 * 32, 50 * 32);

@@ -78,4 +78,4 @@ export type WsMessage =
   | AllPlayerPosUpdateMsg
   | BulletSpawnMsg;
 
-export type teamType = 'Donald Trump' | 'Greta Thunberg';
+export type teamType = 'Team Old' | 'Team New';
