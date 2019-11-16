@@ -18,7 +18,10 @@ export class WebSocketHandler extends Phaser.GameObjects.GameObject {
     this.wsc.addEventListener('open', () => console.log('conneted'));
     this.wsc.addEventListener('message', handleWsMsg(scene));
 
-    this.on('destroy', () => this.wsc.close());
+    this.on('destroy', () => {
+      console.log('destroying websocket connection');
+      this.wsc.close();
+    });
   }
 
   public setPlayerId(playerId: string) {

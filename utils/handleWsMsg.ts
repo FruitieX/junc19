@@ -17,10 +17,13 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
   if (isInitMsg(message)) {
     gameScene.ws!.setPlayerId(message.data.playerId);
     gameScene.ws!.startServerUpdateLoop();
+
+    return;
   }
 
   if (isDisconnectMsg(message)) {
     const playerId = message.data.playerId;
+    console.log('disconnect', message);
 
     let op = gameScene.gameObjects.find(
       go => go instanceof Opponent && (go as Opponent).id === playerId,
@@ -30,6 +33,8 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
       delete gameScene.opponentMap[playerId];
       op.destroy();
     }
+
+    return;
   }
 
   if (isAllPlayerPosUpdateMsg(message)) {
@@ -43,10 +48,15 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
         gameScene.opponentMap[key] = updatedPositions[key];
       }
     }
+
+    return;
   }
 
   if (isHitMsg(message)) {
-    console.log('unhandled msg', message);
+    console.log('you were hit');
+    gameScene.player!.takeDamage(message.data.dmg);
+
+    return;
   }
 
   if (isBulletSpawnMsg(message)) {
@@ -61,5 +71,9 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
         ),
       ),
     );
+
+    return;
   }
+
+  console.log('unhandled msg', message);
 };

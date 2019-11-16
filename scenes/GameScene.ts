@@ -28,6 +28,7 @@ type OpponentPostion = {
 
 export class GameScene extends Phaser.Scene {
   gameObjects: Phaser.GameObjects.GameObject[] = [];
+  public opponents: Opponent[] = [];
   public opponentMap: { [id: string]: OpponentPostion } = {};
   player?: Player;
   music?: Phaser.Sound.BaseSound;
