@@ -381,9 +381,27 @@ export class GameScene extends Phaser.Scene {
       this.statusText?.setVisible(false);
     }
 
+    const team1Score = this.gameState.team1Score;
+    const team2Score = this.gameState.team2Score;
+
+    this.scoreText?.setText([
+      `Your team: ${this.player!.team === team1Name ? team1Score : team2Score}`,
+      `Enemy team: ${
+        this.player!.team === team1Name ? team2Score : team1Score
+      }`,
+    ]);
+
     // don't update objects if game is not active
     if (!this.gameState.gameActive) {
       this.gameWasActive = false;
+
+      // zero objects velocities so they don't move
+      this.gameObjects.forEach(o => {
+        const body: Phaser.Physics.Arcade.Body | undefined = o.body as any;
+        if (body) {
+          body.setVelocity(0, 0);
+        }
+      });
       return;
     }
 
@@ -394,16 +412,6 @@ export class GameScene extends Phaser.Scene {
       // this.gameObjects = [];
       this.player?.spawn(this.player!.team!);
     }
-
-    const team1Score = this.gameState.team1Score;
-    const team2Score = this.gameState.team2Score;
-
-    this.scoreText?.setText([
-      `Your team: ${this.player!.team === team1Name ? team1Score : team2Score}`,
-      `Enemy team: ${
-        this.player!.team === team1Name ? team2Score : team1Score
-      }`,
-    ]);
 
     this.gameObjects.forEach(o => o.update());
 
