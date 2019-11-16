@@ -52,13 +52,13 @@ export class StartScene extends Phaser.Scene {
     this.joinButton.on('pointerup', () => {
       //joinButton.setInteractive(false);
       //exitButton.setInteractive(false);
-      this.scene.start('gameScene');
+      this.scene.start('gameScene', new Boolean(true));
     });
 
     this.localButton.on('pointerup', () => {
       //joinButton.setInteractive(false);
       //exitButton.setInteractive(false);
-      this.scene.start('gameScene');
+      this.scene.start('gameScene', new Boolean(false));
     });
 
     this.exitButton.on('pointerup', () => {
@@ -70,12 +70,10 @@ export class StartScene extends Phaser.Scene {
     let menuVal = 1;
     const gamepad: Phaser.Input.Gamepad.Gamepad | undefined = this.input.gamepad
       ?.pad1;
-
     const upkey: Phaser.Input.Keyboard.Key = this.input.keyboard.addKey('up');
     const downkey: Phaser.Input.Keyboard.Key = this.input.keyboard.addKey(
       'down',
     );
-
     const spacekey: Phaser.Input.Keyboard.Key = this.input.keyboard.addKey(
       'space',
     );
@@ -98,8 +96,7 @@ export class StartScene extends Phaser.Scene {
       this.localButton?.setTexture('localButton');
 
       menuVal = menuVal - 1;
-    }
-    if (downkey.isDown || gamepad?.down) {
+    } else if (downkey.isDown || gamepad?.down) {
       this.exitButton?.setTexture('exitButton');
       this.joinButton?.setTexture('joinButton');
       this.localButton?.setTexture('localButton');
@@ -109,31 +106,36 @@ export class StartScene extends Phaser.Scene {
 
     if (menuVal > 3) {
       menuVal = 3;
-    }
-    if (menuVal < 1) {
+    } else if (menuVal < 1) {
       menuVal = 1;
     }
 
     switch (menuVal) {
       case 1:
         this.joinButton?.setTexture('joinButtonSel');
+        break;
       case 2:
         this.localButton?.setTexture('localButtonSel');
+        break;
       case 3:
-        this.exitButton?.setTexture('exituttonSel');
+        this.exitButton?.setTexture('exitButtonSel');
+        break;
     }
 
-    if (confirm == true) {
+    if (confirm) {
       switch (menuVal) {
         case 1:
-          this.scene.start('gameScene');
+          this.scene.start('gameScene', new Boolean(true));
+          break;
         case 2:
-          this.scene.start('gameScene');
+          this.scene.start('gameScene', new Boolean(false));
+          break;
         case 3:
           this.add.text(420, 420, 'Håll käft', {
             fontSize: '64px',
             color: '#000',
           });
+          break;
       }
     }
   }

@@ -45,9 +45,14 @@ export class GameScene extends Phaser.Scene {
   water?: Phaser.Tilemaps.StaticTilemapLayer;
   ws?: WebSocketHandler;
   deadText?: Phaser.GameObjects.Text;
+  online: Boolean = false;
 
   constructor() {
     super({ key: 'gameScene' });
+  }
+
+  init(online: Boolean) {
+    this.online = online;
   }
 
   public preload() {
@@ -222,8 +227,11 @@ export class GameScene extends Phaser.Scene {
     this.deadText = this.add.text(480, 360, '');
     this.deadText.setColor('#000');
 
-    // azure server ip: 'ws://23.101.58.18:9000'
-    this.ws = new WebSocketHandler(this, 'ws://localhost:9000');
+    if (this.online) {
+      this.ws = new WebSocketHandler(this, 'ws://23.101.58.18:9000');
+    } else {
+      this.ws = new WebSocketHandler(this, 'ws://localhost:9000');
+    }
   }
 
   public update() {
