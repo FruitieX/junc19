@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { GameScene } from '../scenes/GameScene';
 import { Bullet } from '../gameObjects/Bullet';
+import { BulletSpawnMsg } from '../typings/ws-messages';
 
 interface InputState {
   fire: boolean;
@@ -136,19 +137,19 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this,
     );
 
-    this.scene.wsc?.send(
-      JSON.stringify({
-        kind: 'SpawnBullet',
-        data: {
-          x: bulletInitPositionX,
-          y: bulletInitPositionY,
-          direction: {
-            x: direction.x,
-            y: direction.y,
-          },
+    const spawnBulletMessage: BulletSpawnMsg = {
+      kind: 'SpawnBullet',
+      data: {
+        x: bulletInitPositionX,
+        y: bulletInitPositionY,
+        direction: {
+          x: direction.x,
+          y: direction.y,
         },
-      }),
-    );
+      },
+    };
+
+    this.scene.ws!.emitMsg(spawnBulletMessage);
   }
 
   public takeDamage(dmg: number) {
