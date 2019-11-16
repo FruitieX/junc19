@@ -34,6 +34,9 @@ export class WebSocketHandler extends Phaser.GameObjects.GameObject {
   }
 
   public emitMsg(msg: WsMessage) {
+    if (msg.kind !== 'AllPlayerPosUpdate' && msg.kind !== 'PlayerPosUpdate') {
+      console.log('sending msg: ', msg);
+    }
     this.wsc.send(JSON.stringify(msg));
   }
 

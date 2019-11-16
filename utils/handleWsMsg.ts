@@ -70,6 +70,7 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
           message.data.direction.x,
           message.data.direction.y,
         ),
+        false,
       ),
     );
 

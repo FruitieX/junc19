@@ -168,6 +168,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         bulletInitPositionX,
         bulletInitPositionY,
         direction,
+        true,
       ),
     );
 
