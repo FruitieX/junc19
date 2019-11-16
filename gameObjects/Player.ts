@@ -49,7 +49,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.anims.play('idle_orange');
   }
   private reload() {
-    if (this.isReloading) return;
+    if (this.isReloading || this.bullets === this.maxBullets) return;
     this.isReloading = true;
     this.reloadBar!.setActive(true);
 
@@ -62,21 +62,21 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
   public update() {
     if (this.healthbar === undefined) {
-      this.healthbar = this.scene.add.rectangle(0, 0, 50, 10, 0xff0000);
+      this.healthbar = this.scene.add.rectangle(0, 0, 80, 10, 0xff0000);
     }
     if (this.reloadBar === undefined) {
-      this.reloadBar = this.scene.add.rectangle(0, 0, 50, 10, 0x00ffff);
+      this.reloadBar = this.scene.add.rectangle(0, 0, 80, 10, 0x00ffff);
       this.reloadBar.setSize(0, 0);
     }
-    this.healthbar.setPosition(this.x, this.y - 30);
-    this.reloadBar.setPosition(this.x, this.y - 40);
-    this.healthbar.setSize((this.hp / 100) * 200, 10);
+    this.healthbar.setPosition(this.x - 5, this.y - 50);
+    this.reloadBar.setPosition(this.x - 5, this.y - 55);
+    this.healthbar.setSize((this.hp / 100) * 80, 4);
     if (this.isReloading) {
       this.reloadBar.setSize(
         ((this.reloadTime - (new Date().getTime() - this.reloadStartTime)) /
           this.reloadTime) *
-          200,
-        10,
+          80,
+        4,
       );
     }
     this.handleInput();
