@@ -38,6 +38,7 @@ export class GameScene extends Phaser.Scene {
   public create() {
     // initialize tilemap
     const MAP_SCALE = 2;
+    this.cameras.main.setBackgroundColor('#f7d6a3');
 
     const map = this.make.tilemap({ key: 'tilemap' });
     const tileset = map.addTilesetImage('desert', 'tileset');
