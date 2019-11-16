@@ -18,6 +18,7 @@ export class Opponent extends Phaser.Physics.Arcade.Sprite {
     if (pos !== undefined) {
       this.setPosition(pos.x, pos.y);
       this.setRotation(pos.rotation);
+      this.setVelocity(0, 0);
     }
   }
 }
