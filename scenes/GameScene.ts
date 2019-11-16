@@ -5,32 +5,12 @@ import BulletSprite from '../assets/bullet.png';
 import DesertTileMap from '../assets/Dust2.json';
 import DesertTileSet from '../assets/desert.png';
 import { Opponent } from '../gameObjects/Opponent';
-import { TrackableObjects } from '../server/Server';
 import Mozart from '../assets/audio/mozart_einekleine.mp3';
 import { Rectangle } from '../2d-visibility/rectangle';
 import { loadMap } from '../2d-visibility/load-map';
 import { calculateVisibility } from '../2d-visibility/visibility';
-import { handleWsMsg } from '../utils/handleWsMsg';
-import { PlayerPosUpdateMsg } from '../typings/ws-messages';
+import { OpponentPostion } from '../typings/ws-messages';
 import { WebSocketHandler } from '../utils/WebSocketHandler';
-
-type OpponentPostion = {
-  pos: {
-    x: number;
-    y: number;
-  };
-  vel: {
-    x: number;
-    y: number;
-  };
-  rot: number;
-};
-
-// type Message = {
-//   id?: string;
-//   update?: trackableObjects;
-//   dissconnected?: string;
-// };
 
 export class GameScene extends Phaser.Scene {
   gameObjects: Phaser.GameObjects.GameObject[] = [];
@@ -85,9 +65,7 @@ export class GameScene extends Phaser.Scene {
 
     const map = this.make.tilemap({ key: 'tilemap' });
     const tileset = map.addTilesetImage('desert', 'tileset');
-    const bg = map
-      .createStaticLayer('Terrain Base', tileset, 0, 0)
-      .setScale(MAP_SCALE);
+    map.createStaticLayer('Terrain Base', tileset, 0, 0).setScale(MAP_SCALE);
     this.barriers = map
       .createStaticLayer('Barriers', tileset, 0, 0)
       .setScale(MAP_SCALE);
