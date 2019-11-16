@@ -12,6 +12,7 @@ import { loadMap } from '../2d-visibility/load-map';
 import { calculateVisibility } from '../2d-visibility/visibility';
 import { handleWsMsg } from '../utils/handleWsMsg';
 import { PlayerPosUpdateMsg } from '../typings/ws-messages';
+import { WebSocketHandler } from '../utils/WebSocketHandler';
 
 type OpponentPostion = {
   x: number;
@@ -27,9 +28,7 @@ type OpponentPostion = {
 
 export class GameScene extends Phaser.Scene {
   gameObjects: Phaser.GameObjects.GameObject[] = [];
-  playerId?: string;
   public opponentMap: { [id: string]: OpponentPostion } = {};
-  wsc?: WebSocket;
   player?: Player;
   music?: Phaser.Sound.BaseSound;
   minimap?: Phaser.Cameras.Scene2D.CameraManager;
@@ -43,34 +42,10 @@ export class GameScene extends Phaser.Scene {
   visibilityMask?: Phaser.GameObjects.Graphics;
   gameObjectContainer?: Phaser.GameObjects.Container;
   water?: Phaser.Tilemaps.StaticTilemapLayer;
+  ws?: WebSocketHandler;
 
   constructor() {
     super({ key: 'gameScene' });
-  }
-
-  public setPlayerId(playerId: string) {
-    this.playerId = playerId;
-  }
-  public startServerUpdateLoop() {
-    setInterval(() => {
-      const player = this.player;
-      if (!player) return;
-
-      const pos = player.getPosition();
-
-      if (this.playerId !== undefined && this.wsc !== undefined) {
-        const msg: PlayerPosUpdateMsg = {
-          kind: 'PlayerPosUpdate',
-          data: {
-            id: this.playerId,
-            pos,
-            rot: player.rotation,
-          },
-        };
-
-        this.wsc.send(JSON.stringify(msg));
-      }
-    }, 1000 / 20);
   }
 
   public preload() {
@@ -153,14 +128,6 @@ export class GameScene extends Phaser.Scene {
     this.physics.add.collider(player, this.boundaries);
     this.physics.add.collider(player, this.water);
     this.gameObjects.push(player);
-
-    // initialize players
-    this.wsc = new WebSocket('ws://localhost:9000');
-
-    this.wsc.addEventListener('open', ev => {
-      console.log('conneted');
-    });
-    this.wsc.addEventListener('message', handleWsMsg(this));
 
     // background music
     this.music = this.sound.add('music', {
@@ -249,6 +216,8 @@ export class GameScene extends Phaser.Scene {
     this.add.existing(this.visibilityOverlay);
 
     this.gameObjectContainer.setMask(mask);
+
+    this.ws = new WebSocketHandler(this);
   }
 
   public update() {

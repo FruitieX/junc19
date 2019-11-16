@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
 import { GameScene } from '../scenes/GameScene';
+import { Opponent } from './Opponent';
 
 const bulletVelocity = 1000;
 
 export class Bullet extends Phaser.Physics.Arcade.Sprite {
-  game = this.scene.game;
+  gameScene?: GameScene;
 
   constructor(
     scene: GameScene,
@@ -13,6 +14,9 @@ export class Bullet extends Phaser.Physics.Arcade.Sprite {
     direction: Phaser.Math.Vector2,
   ) {
     super(scene, x, y, 'bullet');
+
+    this.scene = scene;
+    this.gameScene = scene;
 
     scene.gameObjectContainer!.add(this);
     this.scene.physics.add.existing(this);
@@ -23,12 +27,12 @@ export class Bullet extends Phaser.Physics.Arcade.Sprite {
       direction.x * bulletVelocity,
       direction.y * bulletVelocity,
     );
-    this.body.onCollide;
   }
 
-  private onCollide = () => {
+  private onCollide: ArcadePhysicsCallback = (object1, object2) => {
+    if (object2 instanceof Opponent) {
+      // this.gameScene!.;
+    }
     this.destroy();
   };
-
-  // TODO: Remove bullet when it is no longer used
 }
