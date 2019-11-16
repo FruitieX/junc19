@@ -72,7 +72,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     return { x: this.x, y: this.y, rotation: this.rotation };
   }
   public spawn(team: TeamType) {
-    console.log(`You are joining ${team}`);
+    console.log(
+      `You are joining ${team} (playerId: ${this.scene.ws?.playerId})`,
+    );
 
     this.hp = 100;
     this.team = team;
