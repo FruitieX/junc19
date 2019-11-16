@@ -49,14 +49,14 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.spawn(this.team!);
     }
 
-    if (this.isDead()) {
+    if (this.isDead() && this.gameScene.deadText) {
       const secondsLeft = Math.ceil(respawnBlockTime / 1000);
-      this.gameScene.deadText!.setText(
+      this.gameScene.deadText.setText(
         `You died! Respawn in ${secondsLeft} second(s).`,
       );
-      this.gameScene.deadText!.setVisible(true);
-    } else {
-      this.gameScene.deadText!.setVisible(false);
+      this.gameScene.deadText.setVisible(true);
+    } else if (this.gameScene.deadText) {
+      this.gameScene.deadText.setVisible(false);
     }
   }
 
