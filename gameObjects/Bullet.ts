@@ -6,17 +6,21 @@ const bulletVelocity = 1000;
 
 export class Bullet extends Phaser.Physics.Arcade.Sprite {
   gameScene?: GameScene;
+  local: boolean;
 
   constructor(
     scene: GameScene,
     x: number,
     y: number,
     direction: Phaser.Math.Vector2,
+    local: boolean, // remote bullets don't emit any events
   ) {
     super(scene, x, y, 'bullet');
 
     this.scene = scene;
     this.gameScene = scene;
+
+    this.local = local;
 
     scene.gameObjectContainer!.add(this);
     this.scene.physics.add.existing(this);
@@ -33,12 +37,16 @@ export class Bullet extends Phaser.Physics.Arcade.Sprite {
   }
 
   private onCollide: ArcadePhysicsCallback = (object1, object2) => {
-    if (object2 instanceof Opponent) {
+    const opponent: Opponent | undefined = [object1, object2].find(
+      obj => obj instanceof Opponent,
+    ) as any;
+
+    if (opponent && this.local) {
       this.gameScene!.ws!.emitMsg({
         kind: 'Hit',
         data: {
           dmg: 20,
-          playerId: object2.id,
+          playerId: opponent.id,
         },
       });
     }

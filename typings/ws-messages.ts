@@ -4,6 +4,7 @@ export interface InitMsg {
   kind: 'Init';
   data: {
     playerId: string;
+    team: teamType;
   };
 }
 export const isInitMsg = (msg: WsMessage): msg is InitMsg =>
@@ -76,3 +77,5 @@ export type WsMessage =
   | HitMsg
   | AllPlayerPosUpdateMsg
   | BulletSpawnMsg;
+
+export type teamType = 'Team Old' | 'Team New';
