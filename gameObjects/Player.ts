@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { GameScene } from '../scenes/GameScene';
 import { Bullet } from '../gameObjects/Bullet';
-import { BulletSpawnMsg } from '../typings/ws-messages';
+import { BulletSpawnMsg, teamType } from '../typings/ws-messages';
 
 interface InputState {
   fire: boolean;
@@ -15,6 +15,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   scene: GameScene = this.scene;
   game = this.scene.game;
   keys = this.scene.input.keyboard.createCursorKeys();
+  isAlive: boolean;
 
   hp = 100;
 
@@ -24,6 +25,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   constructor(scene: GameScene) {
     super(scene, 100, 100, 'player');
+    this.isAlive = false;
     scene.gameObjectContainer!.add(this);
     this.scene.physics.add.existing(this);
     this.anims.play('idle');
@@ -45,7 +47,20 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   public getPosition() {
     return { x: this.x, y: this.y, rotation: this.rotation };
   }
+  public addToMap(team: teamType) {
+    console.log(team);
+    if (team === 'Greta Thunberg') {
+      this.setPosition(10 * 32, 50 * 32);
+    } else {
+      this.setPosition(83 * 32, 50 * 32);
+    }
+    this.isAlive = true;
+  }
   private handleInput() {
+    if (!this.isAlive) {
+      return;
+    }
+
     const gamepad: Phaser.Input.Gamepad.Gamepad | undefined = this.scene.input
       .gamepad?.pad1;
 

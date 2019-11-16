@@ -7,12 +7,18 @@ import {
   isPlayerPosUpdateMsg,
   AllPlayerPosUpdateMsg,
   isBulletSpawnMsg,
+  teamType,
 } from '../typings/ws-messages';
 
 export interface trackablePlayerData {
   x: number;
   y: number;
   rotation: number;
+}
+export interface Connection {
+  id: string;
+  socket: WebSocket;
+  teamId: teamType;
 }
 export type trackableObjects = { [id: string]: trackablePlayerData };
 
@@ -24,16 +30,17 @@ const server = http.createServer(app);
 //initialize the WebSocket server instance
 const wss = new WebSocket.Server({ server });
 
-var connections: { id: string; socket: WebSocket }[] = [];
+var connections: Connection[] = [];
 
 wss.on('connection', (ws: WebSocket) => {
   //connection is up, let's add a simple simple
 
   const playerId = genPlayerId();
-  connections.push({ id: playerId, socket: ws });
+  const team = getTeam();
+  connections.push({ id: playerId, socket: ws, teamId: team });
   console.log('Number of connected devices: ' + connections.length);
 
-  const message: InitMsg = { kind: 'Init', data: { playerId: playerId } };
+  const message: InitMsg = { kind: 'Init', data: { playerId: playerId, team } };
   ws.send(JSON.stringify(message));
 
   ws.on('message', (data: string) => {
@@ -100,6 +107,16 @@ const genId = (): string => {
   return Math.random()
     .toString(36)
     .substring(7);
+};
+const getTeam = (): teamType => {
+  const teamGretaTeamSize = connections.filter(
+    c => c.teamId === 'Greta Thunberg',
+  ).length;
+  const teamTrumpTeamSize = connections.filter(c => c.teamId === 'Donald Trump')
+    .length;
+  return teamGretaTeamSize <= teamTrumpTeamSize
+    ? 'Greta Thunberg'
+    : 'Donald Trump';
 };
 //start our server
 server.listen(9000, () => {

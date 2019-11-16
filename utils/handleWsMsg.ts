@@ -15,8 +15,9 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
   var message = JSON.parse(ev.data) as WsMessage;
 
   if (isInitMsg(message)) {
-    gameScene.ws!.setPlayerId(message.data.playerId);
+    gameScene.ws!.setPlayerData(message.data.playerId, message.data.team);
     gameScene.ws!.startServerUpdateLoop();
+    gameScene.player!.addToMap(message.data.team);
   }
 
   if (isDisconnectMsg(message)) {
