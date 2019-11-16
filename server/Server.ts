@@ -8,6 +8,8 @@ import {
   AllPlayerPosUpdateMsg,
   isBulletSpawnMsg,
   teamType,
+  isHitMsg,
+  DisconnectMsg,
 } from '../typings/ws-messages';
 
 export interface trackablePlayerData {
@@ -40,8 +42,8 @@ wss.on('connection', (ws: WebSocket) => {
   connections.push({ id: playerId, socket: ws, teamId: team });
   console.log('Number of connected devices: ' + connections.length);
 
-  const message: InitMsg = { kind: 'Init', data: { playerId: playerId, team } };
-  ws.send(JSON.stringify(message));
+  const initMsg: InitMsg = { kind: 'Init', data: { playerId: playerId, team } };
+  ws.send(JSON.stringify(initMsg));
 
   ws.on('message', (data: string) => {
     //log the received message and send it back to the client
@@ -61,21 +63,36 @@ wss.on('connection', (ws: WebSocket) => {
         broadcast(message, it.id);
       }
     }
+    if (isHitMsg(message)) {
+      const hitPlayerId = message.data.playerId;
+      let it = connections.find(it => it.id === hitPlayerId);
+
+      if (it) {
+        it.socket.send(JSON.stringify(message));
+      }
+    }
   });
+
   ws.on('close', function(reasonCode, description) {
     let it = connections.find(it => it.socket === ws);
-    connections = connections.filter(otherConn => otherConn.socket !== ws);
-    if (it !== undefined && it.id !== undefined) {
+
+    if (it) {
+      const dcMessage: DisconnectMsg = {
+        kind: 'Disconnect',
+        data: {
+          playerId: it.id,
+        },
+      };
+
+      broadcast(dcMessage, it.id);
+
+      connections = connections.filter(otherConn => otherConn.socket !== ws);
       delete trackableObjects[it.id];
-      connections.forEach(item => {
-        if (it !== undefined) {
-          item.socket.send(JSON.stringify({ dissconnected: it.id }));
-        }
-      });
       console.log('Number of connected devices: ' + connections.length);
     }
   });
 });
+
 setInterval(() => {
   connections.forEach(it => {
     const message: AllPlayerPosUpdateMsg = {

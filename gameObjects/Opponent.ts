@@ -10,6 +10,8 @@ export class Opponent extends Phaser.Physics.Arcade.Sprite {
     scene.gameObjectContainer!.add(this);
     this.scene.physics.add.existing(this);
     this.id = id;
+
+    scene.opponents.push(this);
   }
   public update() {
     const pos = (this.scene as GameScene).opponentMap[this.id];
