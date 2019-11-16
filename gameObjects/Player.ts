@@ -30,7 +30,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   prevInputState = initInputState;
   gameScene: GameScene;
   team?: TeamType;
-  healtbar?: Phaser.GameObjects.Rectangle;
+  healthbar?: Phaser.GameObjects.Rectangle;
   ballsLeft?: Phaser.Cameras.Scene2D.CameraManager;
   isReloading?: boolean;
   reloadBar?: Phaser.GameObjects.Rectangle;
@@ -58,16 +58,16 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }, 3 * 1000);
   }
   public update() {
-    if (this.healtbar === undefined) {
-      this.healtbar = this.scene.add.rectangle(0, 0, 50, 10, 0xff0000);
+    if (this.healthbar === undefined) {
+      this.healthbar = this.scene.add.rectangle(0, 0, 50, 10, 0xff0000);
     }
     if (this.reloadBar === undefined) {
       this.reloadBar = this.scene.add.rectangle(0, 0, 50, 10, 0x00ffff);
       this.reloadBar.setSize(0, 0);
     }
-    this.healtbar.setPosition(this.x, this.y - 30);
+    this.healthbar.setPosition(this.x, this.y - 30);
     this.reloadBar.setPosition(this.x, this.y - 40);
-    this.healtbar.setSize((this.hp / 100) * 200, 10);
+    this.healthbar.setSize((this.hp / 100) * 200, 10);
     if (this.isReloading) {
       this.reloadBar.setSize(
         ((this.reloadTime - (new Date().getTime() - this.reloadStartTime)) /
@@ -251,6 +251,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       };
 
       this.scene.ws!.emitMsg(spawnBulletMessage);
+    } else {
+      this.reload();
     }
     this.bullets = this.bullets - 1;
     this.bullets = Math.max(this.bullets, 0);
