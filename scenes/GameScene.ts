@@ -47,6 +47,8 @@ export class GameScene extends Phaser.Scene {
 
   scoreText?: Phaser.GameObjects.Text;
 
+  ammoText?: Phaser.GameObjects.Text;
+
   online: Boolean = false;
   flag1?: Flag;
   flag2?: Flag;
@@ -362,6 +364,12 @@ export class GameScene extends Phaser.Scene {
     this.scoreText.scrollFactorX = 0;
     this.scoreText.scrollFactorY = 0;
 
+    this.ammoText = this.add.text(1040, 40, '');
+    this.ammoText.setColor('#000');
+    this.ammoText.setFontSize(30);
+    this.ammoText.scrollFactorX = 0;
+    this.ammoText.scrollFactorY = 0;
+
     if (this.online.valueOf()) {
       this.ws = new WebSocketHandler(this, 'ws://23.101.58.18:9000');
     } else {
@@ -390,6 +398,10 @@ export class GameScene extends Phaser.Scene {
         this.player!.team === team1Name ? team2Score : team1Score
       }`,
     ]);
+
+    this.ammoText?.setText(
+      `Ammo: ${this.player?.bullets}/${this.player?.maxBullets}`,
+    );
 
     // don't update objects if game is not active
     if (!this.gameState.gameActive) {

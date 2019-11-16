@@ -19,8 +19,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   game = this.scene.game;
   keys = this.scene.input.keyboard.createCursorKeys();
   isAddedToMap: boolean;
-  maxBullets = 10;
-  bullets = 10;
+  maxBullets = 20;
+  bullets = 20;
   hp = 100;
 
   respawnAtTime?: number;
@@ -254,7 +254,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
     this.bullets = this.bullets - 1;
     this.bullets = Math.max(this.bullets, 0);
-    console.log(this.bullets);
   }
   public takeDamage(dmg: number) {
     if (this.isDead()) return;
