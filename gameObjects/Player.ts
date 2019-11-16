@@ -6,10 +6,12 @@ import { Flag } from './Flag';
 
 interface InputState {
   fire: boolean;
+  reload: boolean;
 }
 
 const initInputState: InputState = {
   fire: false,
+  reload: false,
 };
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
@@ -17,7 +19,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   game = this.scene.game;
   keys = this.scene.input.keyboard.createCursorKeys();
   isAddedToMap: boolean;
-
+  maxBullets = 20;
+  bullets = 20;
   hp = 100;
 
   respawnAtTime?: number;
@@ -28,6 +31,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   gameScene: GameScene;
   team?: TeamType;
   healtbar?: Phaser.GameObjects.Rectangle;
+  ballsLeft?: Phaser.Cameras.Scene2D.CameraManager;
+  isReloading?: boolean;
+  reloadBar?: Phaser.GameObjects.Rectangle;
+  reloadStartTime: number = 0;
+  reloadTime: number = 3 * 1000;
 
   constructor(scene: GameScene) {
     super(scene, 100, 100, 'playerOrange');
@@ -37,12 +45,37 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.scene.physics.add.existing(this);
     this.anims.play('idle_orange');
   }
+  private reload() {
+    if (this.isReloading) return;
+    this.isReloading = true;
+    this.reloadBar!.setActive(true);
+
+    this.reloadStartTime = new Date().getTime();
+    setTimeout(() => {
+      this.bullets = this.maxBullets;
+      this.isReloading = false;
+      this.reloadBar!.setSize(0, 0);
+    }, 3 * 1000);
+  }
   public update() {
     if (this.healtbar === undefined) {
       this.healtbar = this.scene.add.rectangle(0, 0, 50, 10, 0xff0000);
     }
-    this.healtbar.setPosition(this.x, this.y - 20);
-    this.healtbar.setSize((this.hp / 50) * 50, 10);
+    if (this.reloadBar === undefined) {
+      this.reloadBar = this.scene.add.rectangle(0, 0, 50, 10, 0x00ffff);
+      this.reloadBar.setSize(0, 0);
+    }
+    this.healtbar.setPosition(this.x, this.y - 30);
+    this.reloadBar.setPosition(this.x, this.y - 40);
+    this.healtbar.setSize((this.hp / 100) * 200, 10);
+    if (this.isReloading) {
+      this.reloadBar.setSize(
+        ((this.reloadTime - (new Date().getTime() - this.reloadStartTime)) /
+          this.reloadTime) *
+          200,
+        10,
+      );
+    }
     this.handleInput();
     this.updateAnimations();
     this.handleRespawn();
@@ -151,70 +184,77 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       const mouse = this.scene.mousePosition;
       this.setRotation(Math.atan2(mouse.y, mouse.x));
     }
-
+    const reloadDown = this.keys.shift!.isDown || gamepad?.B || !!gamepad?.R1;
+    if (reloadDown && !this.prevInputState.fire) {
+      this.reload();
+    }
     const fireDown = this.keys.space?.isDown || gamepad?.A || !!gamepad?.R2;
 
-    if (fireDown && !this.prevInputState.fire) {
+    if (fireDown && !this.prevInputState.fire && !this.isReloading) {
       this.shoot();
     }
 
     this.prevInputState = {
       fire: fireDown,
+      reload: reloadDown,
     };
   }
 
   private shoot() {
-    const rotation = this.rotation;
-    const vectorX = Math.cos(rotation);
-    const vectorY = Math.sin(rotation);
+    if (this.bullets > 0) {
+      const rotation = this.rotation;
+      const vectorX = Math.cos(rotation);
+      const vectorY = Math.sin(rotation);
 
-    const direction = new Phaser.Math.Vector2(vectorX, vectorY);
+      const direction = new Phaser.Math.Vector2(vectorX, vectorY);
 
-    const offsetVector = new Phaser.Math.Vector2(
-      vectorX * Math.cos(30) + vectorY * Math.sin(30),
-      -vectorX * Math.sin(30) + vectorY * Math.cos(30),
-    );
+      const offsetVector = new Phaser.Math.Vector2(
+        vectorX * Math.cos(30) + vectorY * Math.sin(30),
+        -vectorX * Math.sin(30) + vectorY * Math.cos(30),
+      );
 
-    const bulletInitPositionX = this.x + offsetVector.x * 15;
-    const bulletInitPositionY = this.y + offsetVector.y * 15;
+      const bulletInitPositionX = this.x + offsetVector.x * 15;
+      const bulletInitPositionY = this.y + offsetVector.y * 15;
 
-    this.scene.gameObjects.push(
-      new Bullet(
-        this.scene,
-        bulletInitPositionX,
-        bulletInitPositionY,
-        direction,
-        true,
-        this.scene.ws?.playerId!,
-      ),
-    );
+      this.scene.gameObjects.push(
+        new Bullet(
+          this.scene,
+          bulletInitPositionX,
+          bulletInitPositionY,
+          direction,
+          true,
+          this.scene.ws?.playerId!,
+        ),
+      );
 
-    const anim = this.anims.play('shoot_orange');
-    anim.on(
-      'animationcomplete',
-      () => {
-        this.anims.play('idle_orange');
-        anim.removeListener('animationcomplete');
-      },
-      this,
-    );
-
-    const spawnBulletMessage: BulletSpawnMsg = {
-      kind: 'SpawnBullet',
-      data: {
-        x: bulletInitPositionX,
-        y: bulletInitPositionY,
-        direction: {
-          x: direction.x,
-          y: direction.y,
+      const anim = this.anims.play('shoot_orange');
+      anim.on(
+        'animationcomplete',
+        () => {
+          this.anims.play('idle_orange');
+          anim.removeListener('animationcomplete');
         },
-        ownerId: this.scene.ws?.playerId!,
-      },
-    };
+        this,
+      );
 
-    this.scene.ws!.emitMsg(spawnBulletMessage);
+      const spawnBulletMessage: BulletSpawnMsg = {
+        kind: 'SpawnBullet',
+        data: {
+          x: bulletInitPositionX,
+          y: bulletInitPositionY,
+          direction: {
+            x: direction.x,
+            y: direction.y,
+          },
+          ownerId: this.scene.ws?.playerId!,
+        },
+      };
+
+      this.scene.ws!.emitMsg(spawnBulletMessage);
+    }
+    this.bullets = this.bullets - 1;
+    this.bullets = Math.max(this.bullets, 0);
   }
-
   public takeDamage(dmg: number) {
     if (this.isDead()) return;
     const anim = this.anims.play('blood_orange');

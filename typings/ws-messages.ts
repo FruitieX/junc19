@@ -99,13 +99,16 @@ export interface FlagStateMsg {
 export const isFlagStateMsg = (msg: WsMessage): msg is FlagStateMsg =>
   (msg as FlagStateMsg).kind === 'FlagState';
 
+export interface GameState {
+  team1Score: number;
+  team2Score: number;
+  gameActive: boolean;
+  maxScore: number;
+}
+
 export interface GameStateMsg {
   kind: 'GameState';
-  data: {
-    team1Score: number;
-    team2Score: number;
-    gameActive: boolean;
-  };
+  data: GameState;
 }
 
 export const isGameStateMsg = (msg: WsMessage): msg is GameStateMsg =>

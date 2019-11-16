@@ -62,6 +62,6 @@ export class WebSocketHandler extends Phaser.GameObjects.GameObject {
 
         this.emitMsg(msg);
       }
-    }, 1000 / 20);
+    }, 1000 / 60);
   }
 }

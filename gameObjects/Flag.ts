@@ -24,8 +24,17 @@ export class Flag extends Phaser.Physics.Arcade.Sprite {
   heldByLocalPlayer = false;
   heldByPlayerId?: string;
 
+  // throttle captures by 1s to avoid weird double capture bug?
+  lastCapture = new Date().getTime();
+
   constructor(scene: GameScene, team: TeamType, initPos: Point) {
-    super(scene, initPos.x, initPos.y, 'flags', team === team1Name ? 0 : 1);
+    super(
+      scene,
+      initPos.x,
+      initPos.y,
+      'flags',
+      team === scene.player!.team ? 1 : 0,
+    );
 
     this.flagTeam = team === team1Name ? 1 : 2;
     this.isEnemyFlag = team === scene.player!.team;
@@ -53,7 +62,9 @@ export class Flag extends Phaser.Physics.Arcade.Sprite {
   }
 
   private handleOverlap = () => {
-    if (this.isEnemyFlag) {
+    const dtSinceLastCapture = new Date().getTime() - this.lastCapture;
+
+    if (this.isEnemyFlag && dtSinceLastCapture >= 1000) {
       if (
         !this.heldByLocalPlayer &&
         this.heldByPlayerId === undefined &&
@@ -68,7 +79,8 @@ export class Flag extends Phaser.Physics.Arcade.Sprite {
         const enemyFlag =
           this.flagTeam === 1 ? this.gameScene.flag2! : this.gameScene.flag1!;
 
-        if (enemyFlag.heldByLocalPlayer) {
+        if (enemyFlag.heldByLocalPlayer && dtSinceLastCapture >= 1000) {
+          this.lastCapture = new Date().getTime();
           console.log('capture enemy flag');
 
           const msg: FlagStateMsg = {
@@ -89,10 +101,10 @@ export class Flag extends Phaser.Physics.Arcade.Sprite {
   };
 
   public returnHome() {
+    this.setPosition(this.basePos.x, this.basePos.y);
     this.heldByLocalPlayer = false;
     this.heldByPlayerId = undefined;
     this.isHome = true;
-    this.setPosition(this.basePos.x, this.basePos.y);
   }
 
   private pickupEnemyFlag() {
@@ -133,6 +145,8 @@ export class Flag extends Phaser.Physics.Arcade.Sprite {
   public update() {
     const playerTeam = this.gameScene.player!.team === team1Name ? 1 : 2;
     this.isEnemyFlag = this.flagTeam !== playerTeam;
+
+    this.setFrame(this.team === this.gameScene.player!.team ? 1 : 0);
 
     if (this.heldByPlayerId) {
       const opponentPos: OpponentPosition | undefined = this.gameScene
