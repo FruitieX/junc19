@@ -78,7 +78,6 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
     return;
   }
 
-  console.log(isFlagStateMsg);
   if (isFlagStateMsg(message)) {
     const data = message.data;
     const flag = data.flagTeam === 1 ? gameScene.flag1! : gameScene.flag2!;
@@ -89,6 +88,10 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
       }
       case 'Drop': {
         flag.heldByPlayerId = undefined;
+        break;
+      }
+      case 'Return': {
+        flag.setPosition(flag.basePos.x, flag.basePos.y);
         break;
       }
       default: {

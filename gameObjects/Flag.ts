@@ -116,6 +116,8 @@ export class Flag extends Phaser.Physics.Arcade.Sprite {
         this.setPosition(opponentPos.pos.x, opponentPos.pos.y);
         this.setVelocity(opponentPos.vel.x, opponentPos.vel.y);
       }
+
+      this.isHome = false;
     } else if (this.heldByLocalPlayer) {
       const player = this.gameScene.player!;
       this.setPosition(player.x, player.y);
