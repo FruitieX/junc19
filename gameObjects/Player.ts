@@ -46,17 +46,35 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const gamepad: Phaser.Input.Gamepad.Gamepad | undefined = this.scene.input
       .gamepad?.pad1;
 
-    if (this.keys.up?.isDown || gamepad?.up) {
+    const deadThreshold = 0.1;
+
+    if (
+      this.keys.up?.isDown ||
+      gamepad?.up ||
+      gamepad?.leftStick.y < -deadThreshold
+    ) {
       this.setVelocityY(-this.playerVelocity);
-    } else if (this.keys.down?.isDown || gamepad?.down) {
+    } else if (
+      this.keys.down?.isDown ||
+      gamepad?.down ||
+      gamepad?.leftStick.y > deadThreshold
+    ) {
       this.setVelocityY(this.playerVelocity);
     } else {
       this.setVelocityY(0);
     }
 
-    if (this.keys.left?.isDown || gamepad?.left) {
+    if (
+      this.keys.left?.isDown ||
+      gamepad?.left ||
+      gamepad?.leftStick.x < -deadThreshold
+    ) {
       this.setVelocityX(-this.playerVelocity);
-    } else if (this.keys.right?.isDown || gamepad?.right) {
+    } else if (
+      this.keys.right?.isDown ||
+      gamepad?.right ||
+      gamepad?.leftStick.x > deadThreshold
+    ) {
       this.setVelocityX(this.playerVelocity);
     } else {
       this.setVelocityX(0);
