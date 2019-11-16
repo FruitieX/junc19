@@ -96,11 +96,12 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
           gameScene.setStatusText('The enemy has your flag!');
         }
 
-        break;
+        return;
       }
       case 'Drop': {
         flag.heldByPlayerId = undefined;
-        break;
+
+        return;
       }
       case 'Return': {
         flag.returnHome();
@@ -111,7 +112,7 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
           gameScene.setStatusText('Your flag was returned.');
         }
 
-        break;
+        return;
       }
       case 'Capture': {
         flag.returnHome();
@@ -122,7 +123,7 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
           gameScene.setStatusText('The enemy team scored a capture.');
         }
 
-        break;
+        return;
       }
       default: {
         console.log('unhandled flag state msg:', message);
@@ -132,6 +133,8 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
 
   if (isGameStateMsg(message)) {
     gameScene.updateGameState(message.data);
+
+    return;
   }
 
   console.log('unhandled msg', message);
