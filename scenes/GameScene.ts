@@ -129,13 +129,6 @@ export class GameScene extends Phaser.Scene {
       this.game.input.mouse.requestPointerLock();
     });
 
-    // Exit pointer lock when Q or escape (by default) is pressed.
-    this.input.keyboard.on('keydown_Q', (_e: KeyboardEvent) => {
-      if (this.game.input.mouse.locked) {
-        this.game.input.mouse.releasePointerLock();
-      }
-    });
-
     // Move reticle upon locked pointer move
     this.input.on(
       'pointermove',

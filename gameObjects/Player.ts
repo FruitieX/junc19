@@ -80,7 +80,15 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   private shoot() {
-    const direction = new Phaser.Math.Vector2(1, 0);
+    const rotation = this.rotation;
+    const direction = new Phaser.Math.Vector2(
+      Math.cos(rotation),
+      Math.sin(rotation),
+    );
+
+    this.scene.gameObjects.push(
+      new Bullet(this.scene, this.x, this.y, direction),
+    );
 
     const anim = this.anims.play('shoot');
     anim.on(
@@ -90,9 +98,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         anim.removeListener('animationcomplete');
       },
       this,
-    );
-    this.scene.gameObjects.push(
-      new Bullet(this.scene, this.x, this.y, direction),
     );
   }
 }
