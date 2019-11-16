@@ -38,13 +38,7 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
       // ignore our own playerId
       if (key !== gameScene.playerId) {
         if (gameScene.opponentMap[key] === undefined) {
-          gameScene.gameObjects.push(
-            new Opponent(
-              gameScene,
-              () => undefined /* TODO this.spawnBullet */,
-              key,
-            ),
-          );
+          gameScene.gameObjects.push(new Opponent(gameScene, key));
         }
         gameScene.opponentMap[key] = updatedPositions[key];
       }

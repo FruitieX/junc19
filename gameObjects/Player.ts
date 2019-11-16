@@ -104,21 +104,24 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   private shoot() {
     const rotation = this.rotation;
-    const x = Math.cos(rotation);
-    const y = Math.sin(rotation);
+    const vectorX = Math.cos(rotation);
+    const vectorY = Math.sin(rotation);
 
-    const direction = new Phaser.Math.Vector2(x, y);
+    const direction = new Phaser.Math.Vector2(vectorX, vectorY);
 
     const offsetVector = new Phaser.Math.Vector2(
-      x * Math.cos(30) + y * Math.sin(30),
-      -x * Math.sin(30) + y * Math.cos(30),
+      vectorX * Math.cos(30) + vectorY * Math.sin(30),
+      -vectorX * Math.sin(30) + vectorY * Math.cos(30),
     );
+
+    const bulletInitPositionX = this.x + offsetVector.x * 15;
+    const bulletInitPositionY = this.y + offsetVector.y * 15;
 
     this.scene.gameObjects.push(
       new Bullet(
         this.scene,
-        this.x + offsetVector.x * 15,
-        this.y + offsetVector.y * 15,
+        bulletInitPositionX,
+        bulletInitPositionY,
         direction,
       ),
     );
@@ -131,6 +134,20 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         anim.removeListener('animationcomplete');
       },
       this,
+    );
+
+    this.scene.wsc?.send(
+      JSON.stringify({
+        kind: 'SpawnBullet',
+        data: {
+          x: bulletInitPositionX,
+          y: bulletInitPositionY,
+          direction: {
+            x: direction.x,
+            y: direction.y,
+          },
+        },
+      }),
     );
   }
 

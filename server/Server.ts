@@ -6,6 +6,7 @@ import {
   WsMessage,
   isPlayerPosUpdateMsg,
   AllPlayerPosUpdateMsg,
+  isBulletSpawnMsg,
 } from '../typings/ws-messages';
 
 export interface trackablePlayerData {
@@ -47,6 +48,12 @@ wss.on('connection', (ws: WebSocket) => {
         rotation: message.data.rot,
       };
     }
+    if (isBulletSpawnMsg(message)) {
+      let it = connections.find(it => it.socket === ws);
+      if (it) {
+        broadcast(message, it.id);
+      }
+    }
   });
   ws.on('close', function(reasonCode, description) {
     let it = connections.find(it => it.socket === ws);
@@ -73,6 +80,14 @@ setInterval(() => {
     it.socket.send(JSON.stringify(message));
   });
 }, 1000 / 20);
+
+const broadcast = (message: WsMessage, sender: string) => {
+  connections
+    .filter(c => c.id !== sender)
+    .forEach(c => {
+      c.socket.send(JSON.stringify(message));
+    });
+};
 
 const genPlayerId = () => {
   let id: string = '';
