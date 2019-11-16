@@ -15,6 +15,7 @@ import { handleWsMsg } from '../utils/handleWsMsg';
 type OpponentPostion = {
   x: number;
   y: number;
+  rotation: number;
 };
 
 // type Message = {

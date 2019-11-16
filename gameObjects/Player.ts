@@ -42,7 +42,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
   }
   public getPosition() {
-    return { x: this.x, y: this.y };
+    return { x: this.x, y: this.y, rotation: this.rotation };
   }
   private handleInput() {
     const gamepad: Phaser.Input.Gamepad.Gamepad | undefined = this.scene.input
