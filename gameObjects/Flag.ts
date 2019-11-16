@@ -25,7 +25,13 @@ export class Flag extends Phaser.Physics.Arcade.Sprite {
   heldByPlayerId?: string;
 
   constructor(scene: GameScene, team: TeamType, initPos: Point) {
-    super(scene, initPos.x, initPos.y, 'flags', team === team1Name ? 0 : 1);
+    super(
+      scene,
+      initPos.x,
+      initPos.y,
+      'flags',
+      team === scene.player!.team ? 1 : 0,
+    );
 
     this.flagTeam = team === team1Name ? 1 : 2;
     this.isEnemyFlag = team === scene.player!.team;
@@ -133,6 +139,8 @@ export class Flag extends Phaser.Physics.Arcade.Sprite {
   public update() {
     const playerTeam = this.gameScene.player!.team === team1Name ? 1 : 2;
     this.isEnemyFlag = this.flagTeam !== playerTeam;
+
+    this.setFrame(this.team === this.gameScene.player!.team ? 1 : 0);
 
     if (this.heldByPlayerId) {
       const opponentPos: OpponentPosition | undefined = this.gameScene
