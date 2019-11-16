@@ -44,6 +44,7 @@ export class GameScene extends Phaser.Scene {
   gameObjectContainer?: Phaser.GameObjects.Container;
   water?: Phaser.Tilemaps.StaticTilemapLayer;
   ws?: WebSocketHandler;
+  deadText?: Phaser.GameObjects.Text;
 
   constructor() {
     super({ key: 'gameScene' });
@@ -217,6 +218,9 @@ export class GameScene extends Phaser.Scene {
     this.add.existing(this.visibilityOverlay);
 
     this.gameObjectContainer.setMask(mask);
+
+    this.deadText = this.add.text(480, 360, '');
+    this.deadText.setColor('#000');
 
     // azure server ip: 'ws://23.101.58.18:9000'
     this.ws = new WebSocketHandler(this, 'ws://localhost:9000');
