@@ -265,13 +265,18 @@ export class GameScene extends Phaser.Scene {
   public update() {
     this.gameObjects.forEach(o => o.update());
 
-    if (this.mapBounds && this.blocks && this.visibilityMask) {
-      this.visibilityOverlay!.x = -this.cameras.main.scrollX;
-      this.visibilityOverlay!.y = -this.cameras.main.scrollY;
+    if (
+      this.mapBounds &&
+      this.blocks &&
+      this.visibilityMask &&
+      this.visibilityOverlay
+    ) {
+      this.visibilityOverlay.x = -this.cameras.main.scrollX;
+      this.visibilityOverlay.y = -this.cameras.main.scrollY;
 
       const playerPoint = {
-        x: this.player?.body.x + 32,
-        y: this.player?.body.y + 20,
+        x: (this.player?.body as Phaser.Physics.Arcade.Body).x + 32,
+        y: (this.player?.body as Phaser.Physics.Arcade.Body).y + 20,
       };
 
       const endpoints = loadMap(this.mapBounds, this.blocks, [], playerPoint);
