@@ -225,8 +225,10 @@ export class GameScene extends Phaser.Scene {
 
     this.gameObjectContainer.setMask(mask);
 
-    this.deadText = this.add.text(480, 360, '');
+    this.deadText = this.add.text(480, 260, '');
     this.deadText.setColor('#000');
+    this.deadText.scrollFactorX = 0;
+    this.deadText.scrollFactorY = 0;
 
     if (this.online.valueOf()) {
       console.log('online');
@@ -239,11 +241,6 @@ export class GameScene extends Phaser.Scene {
 
   public update() {
     this.gameObjects.forEach(o => o.update());
-
-    if (this.deadText) {
-      this.deadText.x = 480 + this.cameras.main.scrollX;
-      this.deadText.y = 260 + this.cameras.main.scrollY;
-    }
 
     if (
       this.mapBounds &&
