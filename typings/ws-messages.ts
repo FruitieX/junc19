@@ -24,7 +24,6 @@ export interface PlayerPosUpdateMsg {
     pos: trackableObjects;
   };
 }
-
 export const isPlayerPosUpdateMsg = (
   msg: WsMessage,
 ): msg is PlayerPosUpdateMsg =>
@@ -37,7 +36,6 @@ export interface HitMsg {
     dmg: number;
   };
 }
-
 export const isHitMsg = (msg: WsMessage): msg is HitMsg =>
   (msg as HitMsg).kind === 'Hit';
 

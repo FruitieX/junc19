@@ -6,16 +6,27 @@ import {
   isHitMsg,
 } from '../typings/ws-messages';
 import { GameScene } from '../scenes/GameScene';
+import { Opponent } from '../gameObjects/Opponent';
 
 export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
   var message = JSON.parse(ev.data) as WsMessage;
 
   if (isInitMsg(message)) {
-    console.log('unhandled msg', message);
+    gameScene.setPlayerId(message.data.playerId);
+    gameScene.startServerUpdateLoop();
   }
 
   if (isDisconnectMsg(message)) {
-    console.log('unhandled msg', message);
+    const playerId = message.data.playerId;
+
+    let op = gameScene.gameObjects.find(
+      go => go instanceof Opponent && (go as Opponent).id === playerId,
+    );
+    if (op !== undefined) {
+      gameScene.gameObjects = gameScene.gameObjects.filter(it => it !== op);
+      delete gameScene.opponentMap[playerId];
+      op.destroy();
+    }
   }
 
   if (isPlayerPosUpdateMsg(message)) {
@@ -26,21 +37,6 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
     console.log('unhandled msg', message);
   }
 
-  // if (message.id !== undefined) {
-  //   this.id = message.id;
-  //   this.startUpdating();
-  // }
-  // if (message.dissconnected !== undefined) {
-  //   let op = this.gameObjects.find(
-  //     go =>
-  //       go instanceof Opponent && (go as Opponent).id === message.dissconnected,
-  //   );
-  //   if (op !== undefined) {
-  //     this.gameObjects = this.gameObjects.filter(it => it !== op);
-  //     delete this.opponentMap[message.dissconnected];
-  //     op.destroy;
-  //   }
-  // }
   // if (this.id !== undefined && message.update !== undefined) {
   //   for (let key in message.update) {
   //     if (key !== this.id) {

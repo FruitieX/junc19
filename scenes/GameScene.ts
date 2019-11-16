@@ -26,10 +26,10 @@ type OpponentPostion = {
 
 export class GameScene extends Phaser.Scene {
   gameObjects: Phaser.GameObjects.GameObject[] = [];
-  id: string | undefined;
+  playerId?: string;
   public opponentMap: { [id: string]: OpponentPostion } = {};
   wsc?: WebSocket;
-  player?: Phaser.GameObjects.GameObject;
+  player?: Player;
   music?: Phaser.Sound.BaseSound;
   minimap?: Phaser.Cameras.Scene2D.CameraManager;
   mousePosition?: Phaser.Math.Vector2;
@@ -46,6 +46,25 @@ export class GameScene extends Phaser.Scene {
   constructor() {
     super({ key: 'gameScene' });
   }
+
+  public setPlayerId(playerId: string) {
+    this.playerId = playerId;
+  }
+  public startServerUpdateLoop() {
+    setInterval(() => {
+      const player = this.player;
+      if (!player) return;
+
+      const pos = player.getPosition();
+
+      if (this.playerId !== undefined && this.wsc !== undefined) {
+        this.wsc.send(
+          JSON.stringify({ playerUpdate: { id: this.playerId, pos: pos } }),
+        );
+      }
+    }, 1000 / 20);
+  }
+
   public preload() {
     this.load.spritesheet('player', PlayerSprite, {
       frameWidth: 78,
@@ -224,19 +243,6 @@ export class GameScene extends Phaser.Scene {
     this.gameObjectContainer.setMask(mask);
   }
 
-  private startUpdating() {
-    setInterval(() => {
-      let player = this.gameObjects.filter(
-        it => it instanceof Player,
-      )[0] as Player;
-      let pos = player.getPosition();
-      if (this.id !== undefined && this.wsc !== undefined) {
-        this.wsc.send(
-          JSON.stringify({ playerUpdate: { id: this.id, pos: pos } }),
-        );
-      }
-    }, 1000 / 20);
-  }
   public update() {
     this.gameObjects.forEach(o => o.update());
 
