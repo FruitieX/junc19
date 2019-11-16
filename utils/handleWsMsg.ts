@@ -5,6 +5,7 @@ import {
   isHitMsg,
   isBulletSpawnMsg,
   isAllPlayerPosUpdateMsg,
+  isFlagStateMsg,
 } from '../typings/ws-messages';
 import { GameScene } from '../scenes/GameScene';
 import { Opponent } from '../gameObjects/Opponent';
@@ -77,6 +78,32 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
     );
 
     return;
+  }
+
+  if (isFlagStateMsg(message)) {
+    const data = message.data;
+    const flag = data.flagTeam === 1 ? gameScene.flag1! : gameScene.flag2!;
+    switch (data.event) {
+      case 'PickUp': {
+        flag.heldByPlayerId = data.playerId;
+        break;
+      }
+      case 'Drop': {
+        flag.heldByPlayerId = undefined;
+        break;
+      }
+      case 'Return': {
+        flag.returnHome();
+        break;
+      }
+      case 'Capture': {
+        flag.returnHome();
+        break;
+      }
+      default: {
+        console.log('unhandled flag state msg:', message);
+      }
+    }
   }
 
   console.log('unhandled msg', message);

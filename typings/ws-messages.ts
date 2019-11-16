@@ -1,10 +1,23 @@
 import { TrackableObjects } from '../server/Server';
 
+export type OpponentPostion = {
+  pos: {
+    x: number;
+    y: number;
+  };
+  vel: {
+    x: number;
+    y: number;
+  };
+  rot: number;
+  team: TeamType;
+};
+
 export interface InitMsg {
   kind: 'Init';
   data: {
     playerId: string;
-    team: teamType;
+    team: TeamType;
   };
 }
 export const isInitMsg = (msg: WsMessage): msg is InitMsg =>
@@ -72,12 +85,42 @@ export interface BulletSpawnMsg {
 export const isBulletSpawnMsg = (msg: WsMessage): msg is BulletSpawnMsg =>
   (msg as BulletSpawnMsg).kind === 'SpawnBullet';
 
+export type FlagStateMsgEvent = 'Capture' | 'Return' | 'PickUp' | 'Drop';
+export interface FlagStateMsg {
+  kind: 'FlagState';
+  data: {
+    flagTeam: 1 | 2;
+    event: FlagStateMsgEvent;
+    playerId: string;
+  };
+}
+
+export const isFlagStateMsg = (msg: WsMessage): msg is FlagStateMsg =>
+  (msg as FlagStateMsg).kind === 'FlagState';
+
+export interface GameStateMsg {
+  kind: 'GameState';
+  data: {
+    team1Score: number;
+    team2Score: number;
+    gameActive: boolean;
+  };
+}
+
+export const isGameStateMsg = (msg: WsMessage): msg is GameStateMsg =>
+  (msg as GameStateMsg).kind === 'GameState';
+
 export type WsMessage =
   | InitMsg
   | DisconnectMsg
   | PlayerPosUpdateMsg
   | HitMsg
   | AllPlayerPosUpdateMsg
-  | BulletSpawnMsg;
+  | BulletSpawnMsg
+  | FlagStateMsg
+  | GameStateMsg;
 
-export type teamType = 'Team Old' | 'Team New';
+export type TeamType = typeof team1Name | typeof team2Name;
+
+export const team1Name = 'Team Old';
+export const team2Name = 'Team New';
