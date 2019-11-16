@@ -2,8 +2,10 @@ import Phaser from 'phaser';
 import { GameScene } from './scenes/GameScene';
 
 class SimpleGame {
+  game: Phaser.Game;
+
   constructor() {
-    new Phaser.Game({
+    this.game = new Phaser.Game({
       width: 1280,
       height: 720,
       scene: [GameScene],
@@ -21,5 +23,5 @@ class SimpleGame {
 }
 
 window.onload = () => {
-  new SimpleGame();
+  const simpleGame = new SimpleGame();
 };

@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-type spawnBulletType = (
+export type spawnBulletType = (
   x: number,
   y: number,
   direction: Phaser.Math.Vector2,
@@ -23,7 +23,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   public update() {
     this.handleInput();
   }
-
+  public getPosition() {
+    return { x: this.x, y: this.y };
+  }
   private handleInput() {
     const gamepad: Phaser.Input.Gamepad.Gamepad | undefined = this.scene.input
       .gamepad?.pad1;

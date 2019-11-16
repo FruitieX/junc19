@@ -2,37 +2,77 @@ import express from 'express';
 import * as http from 'http';
 import * as WebSocket from 'ws';
 
-const app = express();
+export type trackableObjects = { [id: string]: { x: number; y: number } };
 
+const app = express();
+let trackableObjects: trackableObjects = {};
 //initialize a simple http server
 const server = http.createServer(app);
 
 //initialize the WebSocket server instance
 const wss = new WebSocket.Server({ server });
-var connections: WebSocket[] = [];
+
+var connections: { id: string; socket: WebSocket }[] = [];
+
 wss.on('connection', (ws: WebSocket) => {
   //connection is up, let's add a simple simple
+
+  const playerId = genPlayerId();
+  connections.push({ id: playerId, socket: ws });
   console.log('Number of connected devices: ' + connections.length);
-  connections.push(ws);
-  ws.on('message', (message: string) => {
+
+  ws.send(JSON.stringify({ id: playerId }));
+
+  ws.on('message', (data: string) => {
     //log the received message and send it back to the client
     //check if there are other connections
-    if (connections.length !== 1) {
-      //if there are, broadcast the message to them
-      connections.forEach(otherWs => {
-        if (otherWs !== ws) {
-          otherWs.send(message);
-        }
-      });
+    let message = JSON.parse(data) as {
+      playerUpdate: { id: string; pos: { x: number; y: number } };
+    };
+    console.log(message.playerUpdate.id);
+    if (message.playerUpdate !== undefined) {
+      trackableObjects[message.playerUpdate.id] = message.playerUpdate.pos;
     }
   });
   ws.on('close', function(reasonCode, description) {
-    connections = connections.filter(it => it !== ws);
-    console.log(new Date() + ' Peer disconnected.');
-    console.log('Number of connected devices: ' + connections.length);
+    let it = connections.find(it => it.socket === ws);
+    connections = connections.filter(otherConn => otherConn.socket !== ws);
+    if (it !== undefined && it.id !== undefined) {
+      delete trackableObjects[it.id];
+      connections.forEach(item => {
+        if (it !== undefined) {
+          item.socket.send(JSON.stringify({ dissconnected: it.id }));
+        }
+      });
+      console.log('Number of connected devices: ' + connections.length);
+    }
   });
 });
+setInterval(() => {
+  connections.forEach(it => {
+    for (let it in trackableObjects) {
+      let pos = trackableObjects[it];
+    }
+    it.socket.send(
+      JSON.stringify({
+        update: trackableObjects,
+      }),
+    );
+  });
+}, 1000 / 20);
 
+const genPlayerId = () => {
+  let id: string = '';
+  do {
+    id = genId();
+  } while (connections.map(it => it.id).indexOf(id) !== -1);
+  return id;
+};
+const genId = (): string => {
+  return Math.random()
+    .toString(36)
+    .substring(7);
+};
 //start our server
 server.listen(9000, () => {
   console.log(
