@@ -1,4 +1,4 @@
-import Phaser, { NONE } from 'phaser';
+import Phaser from 'phaser';
 import { Player } from '../gameObjects/Player';
 import PlayerSprite from '../assets/sprites/player.png';
 import BulletSprite from '../assets/bullet.png';
@@ -14,6 +14,7 @@ export class GameScene extends Phaser.Scene {
   mousePosition?: Phaser.Math.Vector2;
   barriers?: Phaser.Tilemaps.StaticTilemapLayer;
   boundaries?: Phaser.Tilemaps.StaticTilemapLayer;
+  water?: Phaser.Tilemaps.StaticTilemapLayer;
 
   constructor(game: Phaser.Game) {
     super(game);
@@ -50,9 +51,13 @@ export class GameScene extends Phaser.Scene {
     this.boundaries = map
       .createStaticLayer('Boundaries', tileset, 0, 0)
       .setScale(MAP_SCALE);
+    // this.water = map
+    //   .createStaticLayer('Water', tileset, 0, 0)
+    //   .setScale(MAP_SCALE);
 
     this.barriers.setCollisionByProperty({ collides: true });
     this.boundaries.setCollisionByProperty({ collides: true });
+    // this.water.setCollisionByProperty({ collides: true });
 
     this.anims.create({
       key: 'idle',
@@ -87,6 +92,7 @@ export class GameScene extends Phaser.Scene {
     const player = new Player(this);
     this.physics.add.collider(player, this.barriers);
     this.physics.add.collider(player, this.boundaries);
+    // this.physics.add.collider(player, this.water);
     this.gameObjects.push(player);
 
     // background music
