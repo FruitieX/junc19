@@ -15,8 +15,8 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
   var message = JSON.parse(ev.data) as WsMessage;
 
   if (isInitMsg(message)) {
-    gameScene.setPlayerId(message.data.playerId);
-    gameScene.startServerUpdateLoop();
+    gameScene.ws!.setPlayerId(message.data.playerId);
+    gameScene.ws!.startServerUpdateLoop();
   }
 
   if (isDisconnectMsg(message)) {
@@ -36,7 +36,7 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
     const updatedPositions = message.data.pos;
     for (const key in updatedPositions) {
       // ignore our own playerId
-      if (key !== gameScene.playerId) {
+      if (key !== gameScene.ws!.playerId) {
         if (gameScene.opponentMap[key] === undefined) {
           gameScene.gameObjects.push(new Opponent(gameScene, key));
         }
