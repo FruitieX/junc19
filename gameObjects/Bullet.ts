@@ -29,6 +29,7 @@ export class Bullet extends Phaser.Physics.Arcade.Sprite {
     this.isLocalBullet = isLocalBullet;
 
     this.ownerId = ownerId;
+    scene.gunShotSound!.play();
 
     scene.gameObjectContainer!.add(this);
     this.scene.physics.add.existing(this);
