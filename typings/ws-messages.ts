@@ -1,17 +1,5 @@
 import { TrackableObjects } from '../server/Server';
 
-export type OpponentPostion = {
-  pos: {
-    x: number;
-    y: number;
-  };
-  vel: {
-    x: number;
-    y: number;
-  };
-  rot: number;
-};
-
 export interface InitMsg {
   kind: 'Init';
   data: {
