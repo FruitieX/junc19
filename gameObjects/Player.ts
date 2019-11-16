@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { GameScene } from '../scenes/GameScene';
 import { Bullet } from '../gameObjects/Bullet';
-import { BulletSpawnMsg, teamType } from '../typings/ws-messages';
+import { BulletSpawnMsg, teamType as TeamType } from '../typings/ws-messages';
 
 interface InputState {
   fire: boolean;
@@ -25,6 +25,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   prevInputState = initInputState;
   gameScene: GameScene;
+  team?: TeamType;
 
   constructor(scene: GameScene) {
     super(scene, 100, 100, 'player');
@@ -45,10 +46,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const respawnBlockTime = (this.respawnAtTime || 0) - new Date().getTime();
 
     if (this.respawnAtTime && respawnBlockTime <= 0) {
-      console.log('respawning');
-      this.hp = 100;
-      this.setPosition(100, 100);
-      this.respawnAtTime = undefined;
+      this.spawn(this.team!);
     }
 
     if (this.isDead()) {
@@ -73,14 +71,20 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   public getPosition() {
     return { x: this.x, y: this.y, rotation: this.rotation };
   }
-  public addToMap(team: teamType) {
+  public spawn(team: TeamType) {
     console.log(`You are joining ${team}`);
+
+    this.hp = 100;
+    this.team = team;
+
     if (team === 'Team New') {
       this.setPosition(10 * 32, 50 * 32);
     } else {
       this.setPosition(83 * 32, 50 * 32);
     }
+
     this.isAddedToMap = true;
+    this.respawnAtTime = undefined;
   }
 
   public isDead() {
@@ -88,7 +92,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
   private handleInput() {
     // ignore inputs if player is dead
-    if (this.isDead() || !this.isAddedToMap) return;
+    if (this.isDead() || !this.isAddedToMap) {
+      this.setVelocity(0, 0);
+      return;
+    }
 
     const gamepad: Phaser.Input.Gamepad.Gamepad | undefined = this.scene.input
       .gamepad?.pad1;
