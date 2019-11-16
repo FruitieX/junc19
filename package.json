@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "parcel index.html",
-    "reformat": "prettier --write *.{ts,html,css,json,md}"
+    "reformat": "prettier --write *.{ts,html,css,json,md}",
+    "build": "parcel build index.html"
   },
   "repository": {
     "type": "git",

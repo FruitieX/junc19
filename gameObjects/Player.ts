@@ -31,7 +31,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   constructor(scene: GameScene) {
     super(scene, 100, 100, 'player');
     this.isAddedToMap = false;
-    scene.gameObjectContainer!.add(this);
+    scene.add.existing(this);
     this.gameScene = scene;
     this.scene.physics.add.existing(this);
     this.anims.play('idle');
@@ -215,6 +215,15 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   public takeDamage(dmg: number) {
     if (this.isDead()) return;
+    const anim = this.anims.play('blood');
+    anim.on(
+      'animationcomplete',
+      () => {
+        this.anims.play('idle');
+        anim.removeListener('animationcomplete');
+      },
+      this,
+    );
 
     this.hp -= dmg;
     if (this.isDead()) {

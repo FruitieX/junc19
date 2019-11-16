@@ -10,6 +10,7 @@ export class Opponent extends Phaser.Physics.Arcade.Sprite {
     scene.gameObjectContainer!.add(this);
     this.scene.physics.add.existing(this);
     this.id = id;
+    this.anims.play('idle');
 
     scene.opponents.push(this);
   }
