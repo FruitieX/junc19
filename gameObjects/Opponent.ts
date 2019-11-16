@@ -16,6 +16,9 @@ export class Opponent extends Phaser.Physics.Arcade.Sprite {
   }
   public update() {
     const pos = (this.scene as GameScene).opponentMap[this.id];
-    if (pos !== undefined) this.setPosition(pos.x, pos.y);
+    if (pos !== undefined) {
+      this.setPosition(pos.x, pos.y);
+      this.setRotation(pos.rotation);
+    }
   }
 }

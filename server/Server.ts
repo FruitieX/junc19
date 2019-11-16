@@ -2,7 +2,12 @@ import express from 'express';
 import * as http from 'http';
 import * as WebSocket from 'ws';
 
-export type trackableObjects = { [id: string]: { x: number; y: number } };
+export interface trackablePlayerData {
+  x: number;
+  y: number;
+  rotation: number;
+}
+export type trackableObjects = { [id: string]: trackablePlayerData };
 
 const app = express();
 let trackableObjects: trackableObjects = {};
@@ -27,7 +32,7 @@ wss.on('connection', (ws: WebSocket) => {
     //log the received message and send it back to the client
     //check if there are other connections
     let message = JSON.parse(data) as {
-      playerUpdate: { id: string; pos: { x: number; y: number } };
+      playerUpdate: { id: string; pos: trackablePlayerData };
     };
     console.log(message.playerUpdate.id);
     if (message.playerUpdate !== undefined) {

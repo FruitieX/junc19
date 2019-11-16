@@ -14,6 +14,7 @@ import { calculateVisibility } from '../2d-visibility/visibility';
 type OpponentPostion = {
   x: number;
   y: number;
+  rotation: number;
 };
 
 type message = {
