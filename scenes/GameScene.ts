@@ -4,7 +4,7 @@ import PlayerSprite from '../assets/sprites/player.png';
 import BulletSprite from '../assets/bullet.png';
 import DesertTileMap from '../assets/Dust2.json';
 import DesertTileSet from '../assets/desert.png';
-import { Oponent } from '../gameObjects/Oponent';
+import { Opponent } from '../gameObjects/Opponent';
 import { trackableObjects } from '../server/Server';
 import Mozart from '../assets/audio/mozart_einekleine.mp3';
 import { Rectangle } from '../2d-visibility/rectangle';
@@ -140,8 +140,8 @@ export class GameScene extends Phaser.Scene {
       if (message.dissconnected !== undefined) {
         let op = this.gameObjects.find(
           go =>
-            go instanceof Oponent &&
-            (go as Oponent).id === message.dissconnected,
+            go instanceof Opponent &&
+            (go as Opponent).id === message.dissconnected,
         );
         if (op !== undefined) {
           this.gameObjects = this.gameObjects.filter(it => it !== op);
@@ -153,7 +153,7 @@ export class GameScene extends Phaser.Scene {
         for (let key in message.update) {
           if (key !== this.id) {
             if (this.opponentMap[key] === undefined) {
-              this.gameObjects.push(new Oponent(this, this.spawnBullet, key));
+              this.gameObjects.push(new Opponent(this, this.spawnBullet, key));
             }
             this.opponentMap[key] = message.update[key];
           }
