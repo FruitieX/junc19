@@ -5,7 +5,7 @@ import BulletSprite from '../assets/bullet.png';
 import DesertTileMap from '../assets/Dust2.json';
 import DesertTileSet from '../assets/desert.png';
 import { Opponent } from '../gameObjects/Opponent';
-import { trackableObjects } from '../server/Server';
+import { TrackableObjects } from '../server/Server';
 import Mozart from '../assets/audio/mozart_einekleine.mp3';
 import { Rectangle } from '../2d-visibility/rectangle';
 import { loadMap } from '../2d-visibility/load-map';
@@ -15,9 +15,15 @@ import { PlayerPosUpdateMsg } from '../typings/ws-messages';
 import { WebSocketHandler } from '../utils/WebSocketHandler';
 
 type OpponentPostion = {
-  x: number;
-  y: number;
-  rotation: number;
+  pos: {
+    x: number;
+    y: number;
+  };
+  vel: {
+    x: number;
+    y: number;
+  };
+  rot: number;
 };
 
 // type Message = {

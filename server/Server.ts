@@ -12,20 +12,26 @@ import {
   DisconnectMsg,
 } from '../typings/ws-messages';
 
-export interface trackablePlayerData {
-  x: number;
-  y: number;
-  rotation: number;
+export interface TrackablePlayerData {
+  pos: {
+    x: number;
+    y: number;
+  };
+  rot: number;
+  vel: {
+    x: number;
+    y: number;
+  };
 }
 export interface Connection {
   id: string;
   socket: WebSocket;
   teamId: teamType;
 }
-export type trackableObjects = { [id: string]: trackablePlayerData };
+export type TrackableObjects = { [id: string]: TrackablePlayerData };
 
 const app = express();
-let trackableObjects: trackableObjects = {};
+let trackableObjects: TrackableObjects = {};
 //initialize a simple http server
 const server = http.createServer(app);
 
@@ -51,11 +57,7 @@ wss.on('connection', (ws: WebSocket) => {
 
     let message = JSON.parse(data) as WsMessage;
     if (isPlayerPosUpdateMsg(message)) {
-      trackableObjects[message.data.id] = {
-        x: message.data.pos.x,
-        y: message.data.pos.y,
-        rotation: message.data.rot,
-      };
+      trackableObjects[message.data.id] = message.data;
     }
     if (isBulletSpawnMsg(message)) {
       let it = connections.find(it => it.socket === ws);
