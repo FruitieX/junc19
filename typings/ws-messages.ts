@@ -1,4 +1,4 @@
-import { trackableObjects } from '../server/Server';
+import { TrackableObjects } from '../server/Server';
 
 export interface InitMsg {
   kind: 'Init';
@@ -22,7 +22,7 @@ export const isDisconnectMsg = (msg: WsMessage): msg is DisconnectMsg =>
 export interface AllPlayerPosUpdateMsg {
   kind: 'AllPlayerPosUpdate';
   data: {
-    pos: trackableObjects;
+    pos: TrackableObjects;
   };
 }
 export const isAllPlayerPosUpdateMsg = (
@@ -35,6 +35,7 @@ export interface PlayerPosUpdateMsg {
   data: {
     id: string;
     pos: { x: number; y: number };
+    vel: { x: number; y: number };
     rot: number;
   };
 }
@@ -64,6 +65,7 @@ export interface BulletSpawnMsg {
     x: number;
     y: number;
     direction: Vector;
+    ownerId: string;
   };
 }
 

@@ -46,6 +46,7 @@ export class WebSocketHandler extends Phaser.GameObjects.GameObject {
       if (!player) return;
 
       const pos = player.getPosition();
+      const vel = player.body.velocity;
 
       if (this.playerId !== undefined && this.wsc !== undefined) {
         const msg: PlayerPosUpdateMsg = {
@@ -53,6 +54,7 @@ export class WebSocketHandler extends Phaser.GameObjects.GameObject {
           data: {
             id: this.playerId,
             pos,
+            vel,
             rot: player.rotation,
           },
         };

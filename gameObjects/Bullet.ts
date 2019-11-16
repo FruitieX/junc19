@@ -11,6 +11,7 @@ export class Bullet extends Phaser.Physics.Arcade.Sprite {
    * Don't let remote bullets emit hit events
    */
   isLocalBullet: boolean;
+  ownerId: string;
 
   constructor(
     scene: GameScene,
@@ -18,6 +19,7 @@ export class Bullet extends Phaser.Physics.Arcade.Sprite {
     y: number,
     direction: Phaser.Math.Vector2,
     isLocalBullet: boolean,
+    ownerId: string,
   ) {
     super(scene, x, y, 'bullet');
 
@@ -26,13 +28,18 @@ export class Bullet extends Phaser.Physics.Arcade.Sprite {
 
     this.isLocalBullet = isLocalBullet;
 
+    this.ownerId = ownerId;
+
     scene.gameObjectContainer!.add(this);
     this.scene.physics.add.existing(this);
     this.scene.physics.add.collider(this, scene.barriers!, this.onCollide);
     this.scene.physics.add.collider(this, scene.boundaries!, this.onCollide);
-    scene.opponents.forEach(obj =>
-      this.scene.physics.add.collider(this, obj, this.onCollide),
-    );
+    scene.opponents
+      // bullets can't hit their owner
+      .filter(opponent => opponent.id !== this.ownerId)
+      .forEach(obj =>
+        this.scene.physics.add.collider(this, obj, this.onCollide),
+      );
     this.setScale(0.5);
     this.setVelocity(
       direction.x * bulletVelocity,
