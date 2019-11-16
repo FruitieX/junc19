@@ -4,19 +4,12 @@ import PlayerSprite from '../assets/sprites/player.png';
 import BulletSprite from '../assets/bullet.png';
 import DesertTileMap from '../assets/Dust2.json';
 import DesertTileSet from '../assets/desert.png';
-import * as Websocket from 'ws';
 import { Oponent } from '../gameObjects/Oponent';
-import { json } from '../server/node_modules/@types/express';
 import { trackableObjects } from '../server/Server';
 import Mozart from '../assets/audio/mozart_einekleine.mp3';
 import { Rectangle } from '../2d-visibility/rectangle';
 import { loadMap } from '../2d-visibility/load-map';
 import { calculateVisibility } from '../2d-visibility/visibility';
-
-interface TilePoint {
-  x: number;
-  y: number;
-}
 
 type OpponentPostion = {
   x: number;
@@ -29,7 +22,6 @@ type message = {
   dissconnected?: string;
 };
 
-type OpponentPostionMap = { [id: string]: OpponentPostion };
 export class GameScene extends Phaser.Scene {
   gameObjects: Phaser.GameObjects.GameObject[] = [];
   id: string | undefined;
@@ -83,13 +75,13 @@ export class GameScene extends Phaser.Scene {
     this.boundaries = map
       .createStaticLayer('Boundaries', tileset, 0, 0)
       .setScale(MAP_SCALE);
-    // this.water = map
-    //   .createStaticLayer('Water', tileset, 0, 0)
-    //   .setScale(MAP_SCALE);
+    this.water = map
+      .createStaticLayer('Water', tileset, 0, 0)
+      .setScale(MAP_SCALE);
 
     this.barriers.setCollisionByProperty({ collides: true });
     this.boundaries.setCollisionByProperty({ collides: true });
-    // this.water.setCollisionByProperty({ collides: true });
+    this.water.setCollisionByProperty({ collides: true });
 
     this.anims.create({
       key: 'idle',
@@ -128,7 +120,7 @@ export class GameScene extends Phaser.Scene {
     this.player = player;
     this.physics.add.collider(player, this.barriers);
     this.physics.add.collider(player, this.boundaries);
-    // this.physics.add.collider(player, this.water);
+    this.physics.add.collider(player, this.water);
     this.gameObjects.push(player);
 
     // initialize players
