@@ -171,7 +171,7 @@ export class GameScene extends Phaser.Scene {
     );
 
     // TODO: this is not all tiles
-    const tiles = this.barriers?.getTilesWithinWorldXY(0, 0, 1000, 1000);
+    const tiles = this.barriers?.getTilesWithinWorldXY(0, 0, 10000, 10000);
     const wallTiles = tiles.filter(tile => tile.properties.wall);
     const tileSize = 16 * MAP_SCALE;
     this.blocks = wallTiles.map(
@@ -208,37 +208,7 @@ export class GameScene extends Phaser.Scene {
       let dir = new Phaser.Math.Vector2();
 
       visibility.forEach(points => {
-        // points.push(...trianglePoints);
-        // this.graphics.fillStyle(0).fillPoints(
-        //   [
-        //     { x: this.player?.body.x, y: this.player?.body.y },
-        //     { x: point.x * 32, y: point.y * 32 },
-        //     { x: point.x * 32 + 32, y: point.y * 32 + 32 },
-        //   ],
-        //   true,
-        // );
         this.graphics?.fillStyle(0).fillPoints([playerPoint, ...points]);
-
-        points.forEach(point => {
-          dir = dir
-            .set(point.x, point.y)
-            .subtract(playerPos)
-            .normalize();
-
-          visibilityArea.push(
-            point,
-            new Point(point.x + dir.x * 2000, point.y + dir.y * 2000),
-          );
-
-          // this.graphics
-          //   .lineStyle(1, 0)
-          //   .lineBetween(
-          //     point.x,
-          //     point.y,
-          //     point.x + dir.x * 2000,
-          //     point.y + dir.y * 2000,
-          //   );
-        });
       });
 
       // this.graphics?.fillStyle(0).fillPoints(visibilityArea);
