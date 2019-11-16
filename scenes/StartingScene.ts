@@ -2,8 +2,10 @@ import Phaser, { NONE } from 'phaser';
 import { Player } from '../gameObjects/Player';
 import joinButtonImg from '../assets/menu/join_game.png';
 import exitButtonImg from '../assets/menu/exit.png';
+import localButtonImg from '../assets/menu/local_game.png';
 import joinButtonImgSel from '../assets/menu/join_game_selected.png';
 import exitButtonImgSel from '../assets/menu/exit_selected.png';
+import localButtonImgSel from '../assets/menu/local_game_selected.png';
 
 import { GameScene } from './GameScene';
 
@@ -12,7 +14,7 @@ export class StartScene extends Phaser.Scene {
   mousePosition?: Phaser.Math.Vector2;
   joinButton?: Phaser.GameObjects.Image;
   exitButton?: Phaser.GameObjects.Image;
-
+  localButton?: Phaser.GameObjects.Image;
   start: boolean = false;
 
   constructor() {
@@ -23,18 +25,27 @@ export class StartScene extends Phaser.Scene {
     this.load.image('joinButton', joinButtonImg);
     this.load.image('exitButtonSel', exitButtonImgSel);
     this.load.image('joinButtonSel', joinButtonImgSel);
+    this.load.image('localButton', localButtonImg);
+    this.load.image('localButtonSel', localButtonImgSel);
   }
 
   public create() {
     let start = false;
 
     this.cameras.main.setBackgroundColor('#f7d6a3');
+
     this.joinButton = this.add
-      .image(600, 100, 'joinButton')
+      .image(620, 100, 'joinButton')
       .setScale(0.5)
       .setInteractive();
+
+    this.localButton = this.add
+      .image(620, 200, 'localButton')
+      .setScale(0.5)
+      .setInteractive();
+
     this.exitButton = this.add
-      .image(600, 200, 'exitButton')
+      .image(620, 300, 'exitButton')
       .setScale(0.5)
       .setInteractive();
 
@@ -44,18 +55,19 @@ export class StartScene extends Phaser.Scene {
       this.scene.start('gameScene');
     });
 
-    this.joinButton.on('', () => {
+    this.localButton.on('pointerup', () => {
       //joinButton.setInteractive(false);
       //exitButton.setInteractive(false);
       this.scene.start('gameScene');
     });
 
     this.exitButton.on('pointerup', () => {
-      this.add.text(600, 360, 'Håll käft', { fontSize: '64px', color: '#000' });
+      this.add.text(420, 420, 'Håll käft', { fontSize: '64px', color: '#000' });
     });
   }
 
   public update() {
+    let menuVal = 1;
     const gamepad: Phaser.Input.Gamepad.Gamepad | undefined = this.input.gamepad
       ?.pad1;
 
@@ -64,14 +76,65 @@ export class StartScene extends Phaser.Scene {
       'down',
     );
 
+    const spacekey: Phaser.Input.Keyboard.Key = this.input.keyboard.addKey(
+      'space',
+    );
+    const enterkey: Phaser.Input.Keyboard.Key = this.input.keyboard.addKey(
+      'enter',
+    );
+
+    const confirm: Boolean =
+      spacekey.isDown ||
+      enterkey.isDown ||
+      gamepad?.A ||
+      gamepad?.B ||
+      !!gamepad?.R2;
+
     this.gameObjects.forEach(o => o.update());
 
     if (upkey.isDown || gamepad?.up) {
-      this.joinButton?.setTexture('joinButtonSel');
       this.exitButton?.setTexture('exitButton');
-    } else if (downkey.isDown || gamepad?.down) {
-      this.exitButton?.setTexture('exitButtonSel');
       this.joinButton?.setTexture('joinButton');
+      this.localButton?.setTexture('localButton');
+
+      menuVal = menuVal - 1;
+    }
+    if (downkey.isDown || gamepad?.down) {
+      this.exitButton?.setTexture('exitButton');
+      this.joinButton?.setTexture('joinButton');
+      this.localButton?.setTexture('localButton');
+
+      menuVal = menuVal + 1;
+    }
+
+    if (menuVal > 3) {
+      menuVal = 3;
+    }
+    if (menuVal < 1) {
+      menuVal = 1;
+    }
+
+    switch (menuVal) {
+      case 1:
+        this.joinButton?.setTexture('joinButtonSel');
+      case 2:
+        this.localButton?.setTexture('localButtonSel');
+      case 3:
+        this.exitButton?.setTexture('exituttonSel');
+    }
+
+    if (confirm == true) {
+      switch (menuVal) {
+        case 1:
+          this.scene.start('gameScene');
+        case 2:
+          this.scene.start('gameScene');
+        case 3:
+          this.add.text(420, 420, 'Håll käft', {
+            fontSize: '64px',
+            color: '#000',
+          });
+      }
     }
   }
 }
