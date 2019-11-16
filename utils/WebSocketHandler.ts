@@ -56,6 +56,7 @@ export class WebSocketHandler extends Phaser.GameObjects.GameObject {
             pos,
             vel,
             rot: player.rotation,
+            hp: player.hp,
           },
         };
 

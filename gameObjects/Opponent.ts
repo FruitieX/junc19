@@ -1,14 +1,15 @@
 import Phaser from 'phaser';
 import { GameScene } from '../scenes/GameScene';
-import { teamType } from '../typings/ws-messages';
+import { TeamType } from '../typings/ws-messages';
 
 export class Opponent extends Phaser.Physics.Arcade.Sprite {
   game = this.scene.game;
   id: string;
-  team: teamType;
+  team: TeamType;
   gameScene: GameScene;
+  isAlive: boolean;
 
-  constructor(scene: GameScene, id: string, team: teamType) {
+  constructor(scene: GameScene, id: string, team: TeamType) {
     super(
       scene,
       100,
@@ -21,6 +22,7 @@ export class Opponent extends Phaser.Physics.Arcade.Sprite {
     this.id = id;
     this.team = team;
     this.anims.play(`idle_${this.getColor(team)}`);
+    this.isAlive = true;
 
     scene.opponents.push(this);
   }
@@ -32,7 +34,15 @@ export class Opponent extends Phaser.Physics.Arcade.Sprite {
       this.setVelocity(opponentServerData.vel.x, opponentServerData.vel.y);
     }
   }
-  private getColor = (team: teamType) => {
+  private getColor = (team: TeamType) => {
     return team === this.gameScene.player!.team ? 'orange' : 'purple';
+  };
+  public kill = () => {
+    this.setScale(0.5);
+    this.isAlive = false;
+  };
+  public reset = () => {
+    this.setScale(1);
+    this.isAlive = true;
   };
 }

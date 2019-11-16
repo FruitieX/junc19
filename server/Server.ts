@@ -24,6 +24,7 @@ export interface TrackablePlayerData {
     y: number;
   };
   team: TeamType;
+  hp: number;
 }
 export interface Connection {
   id: string;

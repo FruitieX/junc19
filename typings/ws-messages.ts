@@ -50,6 +50,7 @@ export interface PlayerPosUpdateMsg {
     pos: { x: number; y: number };
     vel: { x: number; y: number };
     rot: number;
+    hp: number;
   };
 }
 export const isPlayerPosUpdateMsg = (

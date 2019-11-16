@@ -41,14 +41,31 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
   if (isAllPlayerPosUpdateMsg(message)) {
     const updatedPositions = message.data.pos;
     for (const key in updatedPositions) {
+      const opponent = updatedPositions[key];
       // ignore our own playerId
       if (key !== gameScene.ws!.playerId) {
         if (gameScene.opponentMap[key] === undefined) {
           gameScene.gameObjects.push(
-            new Opponent(gameScene, key, updatedPositions[key].team),
+            new Opponent(gameScene, key, opponent.team),
           );
         }
-        gameScene.opponentMap[key] = updatedPositions[key];
+        gameScene.opponentMap[key] = opponent;
+      }
+
+      const op = gameScene.gameObjects.find(o => {
+        if (o instanceof Opponent) {
+          if (o.id === key) {
+            return true;
+          }
+        }
+        return false;
+      }) as Opponent;
+      if (op) {
+        if (opponent.hp < 1 && op!.isAlive) {
+          op!.kill();
+        } else if (opponent.hp > 0 && !op!.isAlive) {
+          op!.reset();
+        }
       }
     }
 
