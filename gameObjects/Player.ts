@@ -29,14 +29,22 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   public update() {
     this.handleInput();
     this.updateAnimations();
+    this.updateRotation();
   }
 
   private updateAnimations() {
     const currentAnim = this.anims.getCurrentKey();
-    if (this.body.velocity.length() > 0 && currentAnim === 'idle') {
+    if (this.body.velocity.length() > 0) {
       this.anims.play('move', true);
     } else if (currentAnim === 'move') {
       this.anims.play('idle', true);
+    }
+  }
+
+  private updateRotation() {
+    if (this.scene.mousePosition) {
+      const mouse = this.scene.mousePosition;
+      this.setRotation(Math.atan2(mouse.y, mouse.x));
     }
   }
 
@@ -74,9 +82,15 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private shoot() {
     const direction = new Phaser.Math.Vector2(1, 0);
 
-    this.anims.play('shoot').on('animationcomplete', () => {
-      this.anims.play('idle', true);
-    });
+    const anim = this.anims.play('shoot');
+    anim.on(
+      'animationcomplete',
+      () => {
+        this.anims.play('idle');
+        anim.removeListener('animationcomplete');
+      },
+      this,
+    );
     this.scene.gameObjects.push(
       new Bullet(this.scene, this.x, this.y, direction),
     );

@@ -10,6 +10,13 @@ export class GameScene extends Phaser.Scene {
   gameObjects: Phaser.GameObjects.GameObject[] = [];
   music?: Phaser.Sound.BaseSound;
   minimap?: Phaser.Cameras.Scene2D.CameraManager;
+  game: Phaser.Game;
+  mousePosition?: Phaser.Math.Vector2;
+
+  constructor(game: Phaser.Game) {
+    super(game);
+    this.game = game;
+  }
 
   public preload() {
     this.load.spritesheet('player', PlayerSprite, {
@@ -116,6 +123,32 @@ export class GameScene extends Phaser.Scene {
       },
     });
     this.minimap.getCamera('minimap').startFollow(player);
+
+    // Locks pointer on mousedown
+    this.game.canvas.addEventListener('mousedown', () => {
+      this.game.input.mouse.requestPointerLock();
+    });
+
+    // Exit pointer lock when Q or escape (by default) is pressed.
+    this.input.keyboard.on('keydown_Q', (_e: KeyboardEvent) => {
+      if (this.game.input.mouse.locked) {
+        this.game.input.mouse.releasePointerLock();
+      }
+    });
+
+    // Move reticle upon locked pointer move
+    this.input.on(
+      'pointermove',
+      (pointer: PointerEvent) => {
+        if (this.input.mouse.locked) {
+          this.mousePosition = new Phaser.Math.Vector2(
+            pointer.movementX,
+            pointer.movementY,
+          );
+        }
+      },
+      this,
+    );
   }
 
   public update() {
