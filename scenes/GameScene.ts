@@ -11,6 +11,7 @@ import { Rectangle } from '../2d-visibility/rectangle';
 import { loadMap } from '../2d-visibility/load-map';
 import { calculateVisibility } from '../2d-visibility/visibility';
 import { handleWsMsg } from '../utils/handleWsMsg';
+import { PlayerPosUpdateMsg } from '../typings/ws-messages';
 
 type OpponentPostion = {
   x: number;
@@ -58,9 +59,12 @@ export class GameScene extends Phaser.Scene {
       const pos = player.getPosition();
 
       if (this.playerId !== undefined && this.wsc !== undefined) {
-        this.wsc.send(
-          JSON.stringify({ playerUpdate: { id: this.playerId, pos: pos } }),
-        );
+        const msg: PlayerPosUpdateMsg = {
+          id: this.playerId,
+          pos,
+        };
+
+        this.wsc.send(JSON.stringify(msg));
       }
     }, 1000 / 20);
   }
