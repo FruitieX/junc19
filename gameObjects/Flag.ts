@@ -42,7 +42,11 @@ export class Flag extends Phaser.Physics.Arcade.Sprite {
 
   private handleOverlap = () => {
     if (this.isEnemyFlag) {
-      if (!this.heldByLocalPlayer && this.heldByPlayerId === undefined) {
+      if (
+        !this.heldByLocalPlayer &&
+        this.heldByPlayerId === undefined &&
+        !this.gameScene.player!.isDead()
+      ) {
         this.pickupEnemyFlag();
       }
     } else {
