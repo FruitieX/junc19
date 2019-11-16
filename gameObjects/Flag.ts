@@ -24,6 +24,9 @@ export class Flag extends Phaser.Physics.Arcade.Sprite {
   heldByLocalPlayer = false;
   heldByPlayerId?: string;
 
+  // throttle captures by 1s to avoid weird double capture bug?
+  lastCapture = new Date().getTime();
+
   constructor(scene: GameScene, team: TeamType, initPos: Point) {
     super(
       scene,
@@ -59,7 +62,9 @@ export class Flag extends Phaser.Physics.Arcade.Sprite {
   }
 
   private handleOverlap = () => {
-    if (this.isEnemyFlag) {
+    const dtSinceLastCapture = new Date().getTime() - this.lastCapture;
+
+    if (this.isEnemyFlag && dtSinceLastCapture >= 1000) {
       if (
         !this.heldByLocalPlayer &&
         this.heldByPlayerId === undefined &&
@@ -74,7 +79,8 @@ export class Flag extends Phaser.Physics.Arcade.Sprite {
         const enemyFlag =
           this.flagTeam === 1 ? this.gameScene.flag2! : this.gameScene.flag1!;
 
-        if (enemyFlag.heldByLocalPlayer) {
+        if (enemyFlag.heldByLocalPlayer && dtSinceLastCapture >= 1000) {
+          this.lastCapture = new Date().getTime();
           console.log('capture enemy flag');
 
           const msg: FlagStateMsg = {
