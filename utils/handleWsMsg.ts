@@ -83,9 +83,18 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
   if (isFlagStateMsg(message)) {
     const data = message.data;
     const flag = data.flagTeam === 1 ? gameScene.flag1! : gameScene.flag2!;
+    const enemyFlag = flag.isEnemyFlag;
+
     switch (data.event) {
       case 'PickUp': {
         flag.heldByPlayerId = data.playerId;
+
+        if (enemyFlag) {
+          gameScene.setStatusText('Your team has the enemy flag!');
+        } else {
+          gameScene.setStatusText('The enemy has your flag!');
+        }
+
         break;
       }
       case 'Drop': {
@@ -94,10 +103,24 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
       }
       case 'Return': {
         flag.returnHome();
+
+        if (enemyFlag) {
+          gameScene.setStatusText('The enemy flag was returned.');
+        } else {
+          gameScene.setStatusText('Your flag was returned.');
+        }
+
         break;
       }
       case 'Capture': {
         flag.returnHome();
+
+        if (enemyFlag) {
+          gameScene.setStatusText('Your team scored a capture!');
+        } else {
+          gameScene.setStatusText('The enemy team scored a capture.');
+        }
+
         break;
       }
       default: {

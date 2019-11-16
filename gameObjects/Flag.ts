@@ -81,6 +81,8 @@ export class Flag extends Phaser.Physics.Arcade.Sprite {
           };
           this.gameScene.ws!.emitMsg(msg);
           enemyFlag.returnHome();
+
+          this.gameScene.setStatusText('You scored a capture!');
         }
       }
     }
@@ -105,6 +107,8 @@ export class Flag extends Phaser.Physics.Arcade.Sprite {
     this.heldByLocalPlayer = true;
 
     this.emitFlagMsg('PickUp');
+
+    this.gameScene.setStatusText('You got the enemy flag!');
   }
 
   private returnFriendlyFlag() {
@@ -116,6 +120,8 @@ export class Flag extends Phaser.Physics.Arcade.Sprite {
     this.returnHome();
 
     this.emitFlagMsg('Return');
+
+    this.gameScene.setStatusText('You returned your flag.');
   }
 
   public dropEnemyFlag() {

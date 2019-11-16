@@ -36,6 +36,10 @@ export class GameScene extends Phaser.Scene {
   water?: Phaser.Tilemaps.StaticTilemapLayer;
   ws?: WebSocketHandler;
   deadText?: Phaser.GameObjects.Text;
+
+  statusTextTime = new Date().getTime();
+  statusText?: Phaser.GameObjects.Text;
+
   online: Boolean = false;
   flag1?: Flag;
   flag2?: Flag;
@@ -307,6 +311,12 @@ export class GameScene extends Phaser.Scene {
     this.deadText.scrollFactorX = 0;
     this.deadText.scrollFactorY = 0;
 
+    this.statusText = this.add.text(480, 160, '');
+    this.statusText.setColor('#000');
+    this.statusText.setFontSize(30);
+    this.statusText.scrollFactorX = 0;
+    this.statusText.scrollFactorY = 0;
+
     if (this.online.valueOf()) {
       this.ws = new WebSocketHandler(this, 'ws://23.101.58.18:9000');
     } else {
@@ -314,8 +324,19 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  public setStatusText(text: string) {
+    this.statusTextTime = new Date().getTime();
+    this.statusText?.setText(text);
+  }
+
   public update() {
     this.gameObjects.forEach(o => o.update());
+
+    if (new Date().getTime() - this.statusTextTime < 3000) {
+      this.statusText?.setVisible(true);
+    } else {
+      this.statusText?.setVisible(false);
+    }
 
     if (
       this.mapBounds &&
