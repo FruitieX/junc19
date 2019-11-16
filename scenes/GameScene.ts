@@ -125,7 +125,6 @@ export class GameScene extends Phaser.Scene {
     this.gameObjects.push(player);
 
     // initialize players
-    this.gameObjects.push(new Player(this, this.spawnBullet));
     this.wsc = new WebSocket('ws://localhost:9000');
 
     this.wsc.addEventListener('open', ev => {
