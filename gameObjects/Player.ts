@@ -37,6 +37,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   reloadStartTime: number = 0;
   reloadTime: number = 3 * 1000;
 
+  lastShoot = 0;
+  fireRate = 100;
+
   constructor(scene: GameScene) {
     super(scene, 100, 100, 'playerOrange');
     this.isAddedToMap = false;
@@ -184,13 +187,19 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       const mouse = this.scene.mousePosition;
       this.setRotation(Math.atan2(mouse.y, mouse.x));
     }
-    const reloadDown = this.keys.shift!.isDown || gamepad?.B || !!gamepad?.R1;
+    const reloadDown =
+      this.keys.shift!.isDown || gamepad?.B || !!gamepad?.L1 || !!gamepad?.L2;
     if (reloadDown && !this.prevInputState.fire) {
       this.reload();
     }
-    const fireDown = this.keys.space?.isDown || gamepad?.A || !!gamepad?.R2;
+    const fireDown =
+      this.keys.space?.isDown || gamepad?.A || !!gamepad?.R1 || !!gamepad?.R2;
 
-    if (fireDown && !this.prevInputState.fire && !this.isReloading) {
+    if (
+      fireDown &&
+      !this.isReloading &&
+      new Date().getTime() - this.lastShoot >= this.fireRate
+    ) {
       this.shoot();
     }
 
@@ -201,6 +210,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   private shoot() {
+    this.lastShoot = new Date().getTime();
+
     if (this.bullets > 0) {
       const rotation = this.rotation;
       const vectorX = Math.cos(rotation);
@@ -251,11 +262,14 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       };
 
       this.scene.ws!.emitMsg(spawnBulletMessage);
-    } else {
-      this.reload();
     }
+
     this.bullets = this.bullets - 1;
     this.bullets = Math.max(this.bullets, 0);
+
+    if (this.bullets === 0) {
+      this.reload();
+    }
   }
   public takeDamage(dmg: number) {
     if (this.isDead()) return;
