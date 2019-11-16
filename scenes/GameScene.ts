@@ -60,8 +60,12 @@ export class GameScene extends Phaser.Scene {
 
       if (this.playerId !== undefined && this.wsc !== undefined) {
         const msg: PlayerPosUpdateMsg = {
-          id: this.playerId,
-          pos,
+          kind: 'PlayerPosUpdate',
+          data: {
+            id: this.playerId,
+            pos,
+            rot: player.rotation,
+          },
         };
 
         this.wsc.send(JSON.stringify(msg));
