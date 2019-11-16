@@ -1,13 +1,10 @@
-import Phaser, { NONE } from 'phaser';
-import { Player } from '../gameObjects/Player';
+import Phaser from 'phaser';
 import joinButtonImg from '../assets/menu/join_game.png';
 import exitButtonImg from '../assets/menu/exit.png';
 import localButtonImg from '../assets/menu/local_game.png';
 import joinButtonImgSel from '../assets/menu/join_game_selected.png';
 import exitButtonImgSel from '../assets/menu/exit_selected.png';
 import localButtonImgSel from '../assets/menu/local_game_selected.png';
-
-import { GameScene } from './GameScene';
 
 export class StartScene extends Phaser.Scene {
   gameObjects: Phaser.GameObjects.GameObject[] = [];
@@ -30,8 +27,6 @@ export class StartScene extends Phaser.Scene {
   }
 
   public create() {
-    let start = false;
-
     this.cameras.main.setBackgroundColor('#f7d6a3');
 
     this.joinButton = this.add
