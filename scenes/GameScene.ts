@@ -57,7 +57,6 @@ export class GameScene extends Phaser.Scene {
   }
 
   init(online: Boolean) {
-    console.log(online);
     this.online = online;
   }
 
@@ -255,10 +254,8 @@ export class GameScene extends Phaser.Scene {
     this.deadText.scrollFactorY = 0;
 
     if (this.online.valueOf()) {
-      console.log('online');
       this.ws = new WebSocketHandler(this, 'ws://23.101.58.18:9000');
     } else {
-      console.log('offline');
       this.ws = new WebSocketHandler(this, 'ws://localhost:9000');
     }
   }
