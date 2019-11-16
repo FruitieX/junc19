@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import { Player } from '../gameObjects/Player';
 import PlayerSprite from '../assets/sprites/player.png';
-import BloodSprite from '../assets/sprites/blood.png';
 import BulletSprite from '../assets/bullet.png';
 import DesertTileMap from '../assets/Dust2.json';
 import DesertTileSet from '../assets/extruded_desert.png';
@@ -206,10 +205,11 @@ export class GameScene extends Phaser.Scene {
     this.minimap.getCamera('minimap').startFollow(player);
     this.minimap.getCamera('minimap').setBackgroundColor('rgba(0,0,0,0.8)');
     // Locks pointer on mousedown
+
+*/
     this.game.canvas.addEventListener('mousedown', () => {
       this.game.input.mouse.requestPointerLock();
     });
-*/
 
     // Move reticle upon locked pointer move
     this.input.on(
