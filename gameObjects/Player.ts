@@ -19,9 +19,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   prevInputState = initInputState;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: GameScene) {
     super(scene, 100, 100, 'player');
-    this.scene.add.existing(this);
+    scene.gameObjectContainer.add(this);
     this.scene.physics.add.existing(this);
     this.anims.play('idle');
   }
