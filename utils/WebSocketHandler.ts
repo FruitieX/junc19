@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import {
   WsMessage,
   PlayerPosUpdateMsg,
-  teamType,
+  TeamType,
 } from '../typings/ws-messages';
 import { GameScene } from '../scenes/GameScene';
 import { handleWsMsg } from './handleWsMsg';
@@ -10,7 +10,7 @@ import { handleWsMsg } from './handleWsMsg';
 export class WebSocketHandler extends Phaser.GameObjects.GameObject {
   wsc: WebSocket;
   playerId?: string;
-  team?: teamType;
+  team?: TeamType;
   gameScene: GameScene;
 
   constructor(scene: GameScene, connectIp: string) {
@@ -28,7 +28,7 @@ export class WebSocketHandler extends Phaser.GameObjects.GameObject {
     });
   }
 
-  public setPlayerData(playerId: string, team: teamType) {
+  public setPlayerData(playerId: string, team: TeamType) {
     this.playerId = playerId;
     this.team = team;
   }

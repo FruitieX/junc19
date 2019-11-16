@@ -1,7 +1,9 @@
 import Phaser from 'phaser';
 import { Player } from '../gameObjects/Player';
-import PlayerSprite from '../assets/sprites/player.png';
+import PlayerPurpleSprite from '../assets/sprites/player_purple.png';
+import PlayerOrangeSprite from '../assets/sprites/player_orange.png';
 import BulletSprite from '../assets/bullet.png';
+import FlagSprite from '../assets/flags.png';
 import DesertTileMap from '../assets/Dust2.json';
 import DesertTileSet from '../assets/extruded_desert.png';
 import { Opponent } from '../gameObjects/Opponent';
@@ -10,25 +12,9 @@ import GunShot from '../assets/audio/silencer.wav';
 import { Rectangle } from '../2d-visibility/rectangle';
 import { loadMap } from '../2d-visibility/load-map';
 import { calculateVisibility } from '../2d-visibility/visibility';
+import { OpponentPostion, team1Name, team2Name } from '../typings/ws-messages';
 import { WebSocketHandler } from '../utils/WebSocketHandler';
-
-type OpponentPostion = {
-  pos: {
-    x: number;
-    y: number;
-  };
-  vel: {
-    x: number;
-    y: number;
-  };
-  rot: number;
-};
-
-// type Message = {
-//   id?: string;
-//   update?: trackableObjects;
-//   dissconnected?: string;
-// };
+import { Flag } from '../gameObjects/Flag';
 
 export class GameScene extends Phaser.Scene {
   gameObjects: Phaser.GameObjects.GameObject[] = [];
@@ -51,6 +37,8 @@ export class GameScene extends Phaser.Scene {
   ws?: WebSocketHandler;
   deadText?: Phaser.GameObjects.Text;
   online: Boolean = false;
+  flag1?: Flag;
+  flag2?: Flag;
 
   constructor() {
     super({ key: 'gameScene' });
@@ -61,7 +49,11 @@ export class GameScene extends Phaser.Scene {
   }
 
   public preload() {
-    this.load.spritesheet('player', PlayerSprite, {
+    this.load.spritesheet('playerPurple', PlayerPurpleSprite, {
+      frameWidth: 78,
+      frameHeight: 51,
+    });
+    this.load.spritesheet('playerOrange', PlayerOrangeSprite, {
       frameWidth: 78,
       frameHeight: 51,
     });
@@ -70,6 +62,11 @@ export class GameScene extends Phaser.Scene {
     this.load.spritesheet('bullet', BulletSprite, {
       frameWidth: 8,
       frameHeight: 8,
+    });
+
+    this.load.spritesheet('flags', FlagSprite, {
+      frameWidth: 8,
+      frameHeight: 16,
     });
 
     // TODO: fix tile bleeding https://github.com/sporadic-labs/tile-extruder
@@ -84,9 +81,7 @@ export class GameScene extends Phaser.Scene {
 
     const map = this.make.tilemap({ key: 'tilemap' });
     const tileset = map.addTilesetImage('desert', 'tileset');
-    const bg = map
-      .createStaticLayer('Terrain Base', tileset, 0, 0)
-      .setScale(MAP_SCALE);
+    map.createStaticLayer('Terrain Base', tileset, 0, 0).setScale(MAP_SCALE);
     this.barriers = map
       .createStaticLayer('Barriers', tileset, 0, 0)
       .setScale(MAP_SCALE);
@@ -97,13 +92,15 @@ export class GameScene extends Phaser.Scene {
       .createStaticLayer('Water', tileset, 0, 0)
       .setScale(MAP_SCALE);
 
+    this.gameObjectContainer = this.add.container(0, 0);
+
     this.barriers.setCollisionByProperty({ collides: true });
     this.boundaries.setCollisionByProperty({ collides: true });
     this.water.setCollisionByProperty({ collides: true });
 
     this.anims.create({
-      key: 'blood',
-      frames: this.anims.generateFrameNumbers('player', {
+      key: 'blood_purple',
+      frames: this.anims.generateFrameNumbers('playerPurple', {
         start: 0,
         end: 2,
       }),
@@ -112,8 +109,8 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: 'idle',
-      frames: this.anims.generateFrameNumbers('player', {
+      key: 'idle_purple',
+      frames: this.anims.generateFrameNumbers('playerPurple', {
         start: 3,
         end: 22,
       }),
@@ -122,8 +119,8 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: 'move',
-      frames: this.anims.generateFrameNumbers('player', {
+      key: 'move_purple',
+      frames: this.anims.generateFrameNumbers('playerPurple', {
         start: 23,
         end: 42,
       }),
@@ -132,8 +129,48 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: 'shoot',
-      frames: this.anims.generateFrameNumbers('player', {
+      key: 'shoot_purple',
+      frames: this.anims.generateFrameNumbers('playerPurple', {
+        start: 43,
+        end: 45,
+      }),
+      frameRate: 15,
+      repeat: 0,
+    });
+
+    this.anims.create({
+      key: 'blood_orange',
+      frames: this.anims.generateFrameNumbers('playerOrange', {
+        start: 0,
+        end: 2,
+      }),
+      frameRate: 15,
+      repeat: 0,
+    });
+
+    this.anims.create({
+      key: 'idle_orange',
+      frames: this.anims.generateFrameNumbers('playerOrange', {
+        start: 3,
+        end: 22,
+      }),
+      frameRate: 15,
+      repeat: -1,
+    });
+
+    this.anims.create({
+      key: 'move_orange',
+      frames: this.anims.generateFrameNumbers('playerOrange', {
+        start: 23,
+        end: 42,
+      }),
+      frameRate: 15,
+      repeat: -1,
+    });
+
+    this.anims.create({
+      key: 'shoot_orange',
+      frames: this.anims.generateFrameNumbers('playerOrange', {
         start: 43,
         end: 45,
       }),
@@ -143,7 +180,6 @@ export class GameScene extends Phaser.Scene {
 
     this.visibilityOverlay = this.make.graphics({});
     this.visibilityMask = this.make.graphics({});
-    this.gameObjectContainer = this.add.container(0, 0);
 
     const player = new Player(this);
     this.player = player;
@@ -151,6 +187,24 @@ export class GameScene extends Phaser.Scene {
     this.physics.add.collider(player, this.boundaries);
     this.physics.add.collider(player, this.water);
     this.gameObjects.push(player);
+
+    const flag1_tile = map.createFromObjects('Flags', 'flag1', {
+      visible: false,
+    })[0];
+    const flag2_tile = map.createFromObjects('Flags', 'flag2', {
+      visible: false,
+    })[0];
+
+    this.flag1 = new Flag(this, team1Name, {
+      x: flag1_tile.x * MAP_SCALE,
+      y: flag1_tile.y * MAP_SCALE,
+    });
+    this.gameObjects.push(this.flag1);
+    this.flag2 = new Flag(this, team2Name, {
+      x: flag2_tile.x * MAP_SCALE,
+      y: flag2_tile.y * MAP_SCALE,
+    });
+    this.gameObjects.push(this.flag2);
 
     // background music
     this.music = this.sound.add('music', {

@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { GameScene } from '../scenes/GameScene';
 import { Bullet } from '../gameObjects/Bullet';
-import { BulletSpawnMsg, teamType as TeamType } from '../typings/ws-messages';
+import { BulletSpawnMsg, TeamType } from '../typings/ws-messages';
+import { Flag } from './Flag';
 
 interface InputState {
   fire: boolean;
@@ -29,12 +30,12 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   healtbar?: Phaser.GameObjects.Rectangle;
 
   constructor(scene: GameScene) {
-    super(scene, 100, 100, 'player');
+    super(scene, 100, 100, 'playerOrange');
     this.isAddedToMap = false;
     scene.add.existing(this);
     this.gameScene = scene;
     this.scene.physics.add.existing(this);
-    this.anims.play('idle');
+    this.anims.play('idle_orange');
   }
   public update() {
     if (this.healtbar === undefined) {
@@ -68,9 +69,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private updateAnimations() {
     const currentAnim = this.anims.getCurrentKey();
     if (this.body.velocity.length() > 0) {
-      this.anims.play('move', true);
+      this.anims.play('move_orange', true);
     } else if (currentAnim === 'move') {
-      this.anims.play('idle', true);
+      this.anims.play('idle_orange', true);
     }
   }
   public getPosition() {
@@ -87,7 +88,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (team === 'Team New') {
       this.setPosition(10 * 32, 50 * 32);
     } else {
-      this.setPosition(83 * 32, 50 * 32);
+      // this.setPosition(83 * 32, 50 * 32);
+      this.setPosition(15 * 32, 50 * 32);
     }
 
     this.isAddedToMap = true;
@@ -187,11 +189,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       ),
     );
 
-    const anim = this.anims.play('shoot');
+    const anim = this.anims.play('shoot_orange');
     anim.on(
       'animationcomplete',
       () => {
-        this.anims.play('idle');
+        this.anims.play('idle_orange');
         anim.removeListener('animationcomplete');
       },
       this,
@@ -215,11 +217,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   public takeDamage(dmg: number) {
     if (this.isDead()) return;
-    const anim = this.anims.play('blood');
+    const anim = this.anims.play('blood_orange');
     anim.on(
       'animationcomplete',
       () => {
-        this.anims.play('idle');
+        this.anims.play('idle_orange');
         anim.removeListener('animationcomplete');
       },
       this,
@@ -227,8 +229,21 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.hp -= dmg;
     if (this.isDead()) {
-      console.log('you died :(');
-      this.respawnAtTime = new Date().getTime() + 5000;
+      this.die();
+    }
+  }
+
+  public die() {
+    console.log('you died :(');
+    this.respawnAtTime = new Date().getTime() + 5000;
+
+    const heldFlag: Flag | undefined = this.gameScene!.gameObjects!.filter(
+      obj => obj instanceof Flag,
+    ).find((flag: any) => (flag as Flag).heldByLocalPlayer) as any;
+    console.log('heldFlag', heldFlag);
+
+    if (heldFlag) {
+      heldFlag.dropEnemyFlag();
     }
   }
 }

@@ -7,9 +7,10 @@ import {
   isPlayerPosUpdateMsg,
   AllPlayerPosUpdateMsg,
   isBulletSpawnMsg,
-  teamType,
+  TeamType,
   isHitMsg,
   DisconnectMsg,
+  isFlagStateMsg,
 } from '../typings/ws-messages';
 
 export interface TrackablePlayerData {
@@ -22,11 +23,12 @@ export interface TrackablePlayerData {
     x: number;
     y: number;
   };
+  team: teamType;
 }
 export interface Connection {
   id: string;
   socket: WebSocket;
-  teamId: teamType;
+  teamId: TeamType;
 }
 export type TrackableObjects = { [id: string]: TrackablePlayerData };
 
@@ -55,22 +57,36 @@ wss.on('connection', (ws: WebSocket) => {
     //log the received message and send it back to the client
     //check if there are other connections
 
+    let sender = connections.find(it => it.socket === ws);
+
     let message = JSON.parse(data) as WsMessage;
+
     if (isPlayerPosUpdateMsg(message)) {
-      trackableObjects[message.data.id] = message.data;
+      trackableObjects[message.data.id] = {
+        ...message.data,
+        team: sender!.teamId,
+      };
     }
+
     if (isBulletSpawnMsg(message)) {
-      let it = connections.find(it => it.socket === ws);
-      if (it) {
-        broadcast(message, it.id);
+      if (sender) {
+        broadcast(message, sender.id);
       }
     }
+
     if (isHitMsg(message)) {
       const hitPlayerId = message.data.playerId;
       let it = connections.find(it => it.id === hitPlayerId);
 
       if (it) {
         it.socket.send(JSON.stringify(message));
+      }
+    }
+
+    if (isFlagStateMsg(message)) {
+      let it = connections.find(it => it.socket === ws);
+      if (it) {
+        broadcast(message, it.id);
       }
     }
   });
@@ -127,7 +143,7 @@ const genId = (): string => {
     .toString(36)
     .substring(7);
 };
-const getTeam = (): teamType => {
+const getTeam = (): TeamType => {
   const teamGretaTeamSize = connections.filter(c => c.teamId === 'Team New')
     .length;
   const teamTrumpTeamSize = connections.filter(c => c.teamId === 'Team Old')
