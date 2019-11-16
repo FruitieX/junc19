@@ -242,7 +242,7 @@ export class GameScene extends Phaser.Scene {
 
     if (this.deadText) {
       this.deadText.x = 480 + this.cameras.main.scrollX;
-      this.deadText.y = 360 + this.cameras.main.scrollY;
+      this.deadText.y = 260 + this.cameras.main.scrollY;
     }
 
     if (
