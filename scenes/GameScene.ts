@@ -56,7 +56,9 @@ export class GameScene extends Phaser.Scene {
 
     const map = this.make.tilemap({ key: 'tilemap' });
     const tileset = map.addTilesetImage('desert', 'tileset');
-    map.createStaticLayer('Terrain Base', tileset, 0, 0).setScale(MAP_SCALE);
+    const bg = map
+      .createStaticLayer('Terrain Base', tileset, 0, 0)
+      .setScale(MAP_SCALE);
     this.barriers = map
       .createStaticLayer('Barriers', tileset, 0, 0)
       .setScale(MAP_SCALE);
@@ -97,7 +99,7 @@ export class GameScene extends Phaser.Scene {
       repeat: 0,
     });
 
-    this.graphics = this.add.graphics();
+    this.graphics = this.make.graphics({});
 
     const player = new Player(this);
     this.player = player;
@@ -183,53 +185,31 @@ export class GameScene extends Phaser.Scene {
           tile.height * MAP_SCALE,
         ),
     );
+
+    const visibilityMask = this.graphics.createGeometryMask();
+    this.cameras.main.setMask(visibilityMask);
   }
 
   public update() {
     this.gameObjects.forEach(o => o.update());
 
     if (this.mapBounds && this.blocks && this.graphics) {
+      this.graphics.x = -this.cameras.main.scrollX;
+      this.graphics.y = -this.cameras.main.scrollY;
+
       const playerPoint = {
         x: this.player?.body.x + 32,
         y: this.player?.body.y + 20,
       };
-      const playerPos = new Phaser.Math.Vector2(
-        this.player?.body.x + 32,
-        this.player?.body.y + 20,
-      );
 
       const endpoints = loadMap(this.mapBounds, this.blocks, [], playerPoint);
       const visibility = calculateVisibility(playerPoint, endpoints);
 
       this.graphics.clear();
 
-      const visibilityArea: Point[] = [playerPoint];
-
-      let dir = new Phaser.Math.Vector2();
-
       visibility.forEach(points => {
         this.graphics?.fillStyle(0).fillPoints([playerPoint, ...points]);
       });
-
-      // this.graphics?.fillStyle(0).fillPoints(visibilityArea);
     }
-
-    // if (this.graphics) {
-    //   const visibleTiles = this.barriers?.getTilesWithinWorldXY(
-    //     0,
-    //     0,
-    //     1000,
-    //     1000,
-    //   );
-
-    //   if (this.player && this.graphics && visibleTiles) {
-    //     const wallTiles = visibleTiles.filter(tile => tile.properties.wall);
-    //     const points: TilePoint[] = wallTiles.map(tile => ({
-    //       x: tile.x,
-    //       y: tile.y,
-    //     }));
-
-    //   }
-    // }
   }
 }
