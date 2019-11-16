@@ -218,7 +218,8 @@ export class GameScene extends Phaser.Scene {
 
     this.gameObjectContainer.setMask(mask);
 
-    this.ws = new WebSocketHandler(this);
+    // azure server ip: 'ws://23.101.58.18:9000'
+    this.ws = new WebSocketHandler(this, 'ws://localhost:9000');
   }
 
   public update() {

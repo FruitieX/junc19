@@ -8,12 +8,11 @@ export class WebSocketHandler extends Phaser.GameObjects.GameObject {
   playerId?: string;
   gameScene: GameScene;
 
-  constructor(scene: GameScene) {
+  constructor(scene: GameScene, connectIp: string) {
     super(scene, 'ws');
     this.gameScene = scene;
 
-    // initialize players
-    this.wsc = new WebSocket('ws://localhost:9000');
+    this.wsc = new WebSocket(connectIp);
 
     this.wsc.addEventListener('open', () => console.log('conneted'));
     this.wsc.addEventListener('message', handleWsMsg(scene));
