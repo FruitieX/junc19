@@ -39,7 +39,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.anims.play('idle', true);
     }
   }
-
+  public getPosition() {
+    return { x: this.x, y: this.y };
+  }
   private handleInput() {
     const gamepad: Phaser.Input.Gamepad.Gamepad | undefined = this.scene.input
       .gamepad?.pad1;
