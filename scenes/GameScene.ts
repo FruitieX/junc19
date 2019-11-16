@@ -2,7 +2,7 @@ import Phaser, { NONE } from 'phaser';
 import { Player } from '../gameObjects/Player';
 import PlayerSprite from '../assets/sprites/player.png';
 import BulletSprite from '../assets/bullet.png';
-import DesertTileMap from '../assets/Desert_Tilemap_800x800.json';
+import DesertTileMap from '../assets/Dust2.json';
 import DesertTileSet from '../assets/desert.png';
 import Mozart from '../assets/audio/mozart_einekleine.mp3';
 
@@ -13,6 +13,7 @@ export class GameScene extends Phaser.Scene {
   game: Phaser.Game;
   mousePosition?: Phaser.Math.Vector2;
   barriers?: Phaser.Tilemaps.StaticTilemapLayer;
+  boundaries?: Phaser.Tilemaps.StaticTilemapLayer;
 
   constructor(game: Phaser.Game) {
     super(game);
@@ -46,8 +47,12 @@ export class GameScene extends Phaser.Scene {
     this.barriers = map
       .createStaticLayer('Barriers', tileset, 0, 0)
       .setScale(MAP_SCALE);
+    this.boundaries = map
+      .createStaticLayer('Boundaries', tileset, 0, 0)
+      .setScale(MAP_SCALE);
 
     this.barriers.setCollisionByProperty({ collides: true });
+    this.boundaries.setCollisionByProperty({ collides: true });
 
     this.anims.create({
       key: 'idle',
@@ -81,6 +86,7 @@ export class GameScene extends Phaser.Scene {
 
     const player = new Player(this);
     this.physics.add.collider(player, this.barriers);
+    this.physics.add.collider(player, this.boundaries);
     this.gameObjects.push(player);
 
     // background music
