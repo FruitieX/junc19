@@ -69,7 +69,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.setRotation(Math.atan2(mouse.y, mouse.x));
     }
 
-    const fireDown = this.keys.space?.isDown || gamepad?.A;
+    const fireDown = this.keys.space?.isDown || gamepad?.A || !!gamepad?.R2;
 
     if (fireDown && !this.prevInputState.fire) {
       this.shoot();
