@@ -18,13 +18,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   hp = 100;
 
+  respawnAtTime?: number;
+
   playerVelocity = 250;
 
   prevInputState = initInputState;
+  gameScene: GameScene;
 
   constructor(scene: GameScene) {
     super(scene, 100, 100, 'player');
     scene.gameObjectContainer!.add(this);
+    this.gameScene = scene;
     this.scene.physics.add.existing(this);
     this.anims.play('idle');
   }
@@ -32,6 +36,28 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   public update() {
     this.handleInput();
     this.updateAnimations();
+    this.handleRespawn();
+  }
+
+  private handleRespawn() {
+    const respawnBlockTime = (this.respawnAtTime || 0) - new Date().getTime();
+
+    if (this.respawnAtTime && respawnBlockTime <= 0) {
+      console.log('respawning');
+      this.hp = 100;
+      this.setPosition(100, 100);
+      this.respawnAtTime = undefined;
+    }
+
+    if (this.isDead()) {
+      const secondsLeft = Math.ceil(respawnBlockTime / 1000);
+      this.gameScene.deadText!.setText(
+        `You died! Respawn in ${secondsLeft} second(s).`,
+      );
+      this.gameScene.deadText!.setVisible(true);
+    } else {
+      this.gameScene.deadText!.setVisible(false);
+    }
   }
 
   private updateAnimations() {
@@ -45,7 +71,14 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   public getPosition() {
     return { x: this.x, y: this.y, rotation: this.rotation };
   }
+
+  public isDead() {
+    return this.hp <= 0;
+  }
   private handleInput() {
+    // ignore inputs if player is dead
+    if (this.isDead()) return;
+
     const gamepad: Phaser.Input.Gamepad.Gamepad | undefined = this.scene.input
       .gamepad?.pad1;
 
@@ -153,10 +186,12 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   public takeDamage(dmg: number) {
+    if (this.isDead()) return;
+
     this.hp -= dmg;
-    if (this.hp < 0) {
+    if (this.isDead()) {
       console.log('you died :(');
-      this.destroy();
+      this.respawnAtTime = new Date().getTime() + 5000;
     }
   }
 }
