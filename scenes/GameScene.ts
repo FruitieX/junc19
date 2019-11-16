@@ -2,16 +2,30 @@ import Phaser, { NONE } from 'phaser';
 import { Player } from '../gameObjects/Player';
 import PlayerSprite from '../assets/sprites/player.png';
 import BulletSprite from '../assets/bullet.png';
-import DesertTileMap from '../assets/Desert_Tilemap_800x800.json';
+import DesertTileMap from '../assets/Dust2.json';
 import DesertTileSet from '../assets/desert.png';
 import Mozart from '../assets/audio/mozart_einekleine.mp3';
+import { Rectangle } from '../2d-visibility/rectangle';
+import { loadMap } from '../2d-visibility/load-map';
+import { calculateVisibility } from '../2d-visibility/visibility';
+import { Point } from '../2d-visibility/point';
+
+interface TilePoint {
+  x: number;
+  y: number;
+}
 
 export class GameScene extends Phaser.Scene {
   gameObjects: Phaser.GameObjects.GameObject[] = [];
+  player?: Phaser.GameObjects.GameObject;
   music?: Phaser.Sound.BaseSound;
   minimap?: Phaser.Cameras.Scene2D.CameraManager;
   mousePosition?: Phaser.Math.Vector2;
   barriers?: Phaser.Tilemaps.StaticTilemapLayer;
+  boundaries?: Phaser.Tilemaps.StaticTilemapLayer;
+  graphics?: Phaser.GameObjects.Graphics;
+  blocks?: Rectangle[];
+  mapBounds?: Rectangle;
 
   constructor() {
     super({ key: 'gameScene' });
@@ -39,12 +53,18 @@ export class GameScene extends Phaser.Scene {
 
     const map = this.make.tilemap({ key: 'tilemap' });
     const tileset = map.addTilesetImage('desert', 'tileset');
-    map.createStaticLayer('Terrain Base', tileset, 0, 0).setScale(MAP_SCALE);
+    const bg = map
+      .createStaticLayer('Terrain Base', tileset, 0, 0)
+      .setScale(MAP_SCALE);
     this.barriers = map
       .createStaticLayer('Barriers', tileset, 0, 0)
       .setScale(MAP_SCALE);
+    this.boundaries = map
+      .createStaticLayer('Boundaries', tileset, 0, 0)
+      .setScale(MAP_SCALE);
 
     this.barriers.setCollisionByProperty({ collides: true });
+    this.boundaries.setCollisionByProperty({ collides: true });
 
     this.anims.create({
       key: 'idle',
@@ -76,8 +96,13 @@ export class GameScene extends Phaser.Scene {
       repeat: 0,
     });
 
+    this.graphics = this.make.graphics({});
+
     const player = new Player(this);
+    this.player = player;
     this.physics.add.collider(player, this.barriers);
+    this.physics.add.collider(player, this.boundaries);
+
     this.gameObjects.push(player);
 
     // background music
@@ -101,6 +126,13 @@ export class GameScene extends Phaser.Scene {
     );
     this.cameras.main.startFollow(player);
 
+    this.mapBounds = new Rectangle(
+      0,
+      0,
+      map.widthInPixels * MAP_SCALE,
+      map.heightInPixels * MAP_SCALE,
+    );
+
     //add minimap
     this.minimap = this.cameras.fromJSON({
       name: 'minimap',
@@ -114,12 +146,7 @@ export class GameScene extends Phaser.Scene {
       scrollY: map.heightInPixels * MAP_SCALE * 2,
       roundPixels: false,
       backgroundColor: false,
-      bounds: {
-        x: 0,
-        y: 0,
-        width: map.widthInPixels * MAP_SCALE,
-        height: map.heightInPixels * MAP_SCALE,
-      },
+      bounds: this.mapBounds,
     });
     this.minimap.getCamera('minimap').startFollow(player);
 
@@ -141,9 +168,45 @@ export class GameScene extends Phaser.Scene {
       },
       this,
     );
+
+    // TODO: this is not all tiles
+    const tiles = this.barriers?.getTilesWithinWorldXY(0, 0, 10000, 10000);
+    const wallTiles = tiles.filter(tile => tile.properties.wall);
+    const tileSize = 16 * MAP_SCALE;
+    this.blocks = wallTiles.map(
+      tile =>
+        new Rectangle(
+          tile.x * tileSize,
+          tile.y * tileSize,
+          tile.width * MAP_SCALE,
+          tile.height * MAP_SCALE,
+        ),
+    );
+
+    const visibilityMask = this.graphics.createGeometryMask();
+    this.cameras.main.setMask(visibilityMask);
   }
 
   public update() {
     this.gameObjects.forEach(o => o.update());
+
+    if (this.mapBounds && this.blocks && this.graphics) {
+      this.graphics.x = -this.cameras.main.scrollX;
+      this.graphics.y = -this.cameras.main.scrollY;
+
+      const playerPoint = {
+        x: this.player?.body.x + 32,
+        y: this.player?.body.y + 20,
+      };
+
+      const endpoints = loadMap(this.mapBounds, this.blocks, [], playerPoint);
+      const visibility = calculateVisibility(playerPoint, endpoints);
+
+      this.graphics.clear();
+
+      visibility.forEach(points => {
+        this.graphics?.fillStyle(0).fillPoints([playerPoint, ...points]);
+      });
+    }
   }
 }
