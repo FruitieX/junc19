@@ -39,4 +39,26 @@ export interface HitMsg {
 export const isHitMsg = (msg: WsMessage): msg is HitMsg =>
   (msg as HitMsg).kind === 'Hit';
 
-export type WsMessage = InitMsg | DisconnectMsg | PlayerPosUpdateMsg | HitMsg;
+interface Vector {
+  x: number;
+  y: number;
+}
+
+export interface BulletSpawnMsg {
+  kind: 'SpawnBullet';
+  data: {
+    x: number;
+    y: number;
+    direction: Vector;
+  };
+}
+
+export const isBulletSpawnMsg = (msg: WsMessage): msg is BulletSpawnMsg =>
+  (msg as BulletSpawnMsg).kind === 'SpawnBullet';
+
+export type WsMessage =
+  | InitMsg
+  | DisconnectMsg
+  | PlayerPosUpdateMsg
+  | HitMsg
+  | BulletSpawnMsg;
