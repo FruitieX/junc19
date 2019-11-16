@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Player } from '../gameObjects/Player';
-import PlayerSprite from '../assets/sprites/player.png';
+import PlayerPurpleSprite from '../assets/sprites/player_purple.png';
+import PlayerOrangeSprite from '../assets/sprites/player_orange.png';
 import BulletSprite from '../assets/bullet.png';
 import DesertTileMap from '../assets/Dust2.json';
 import DesertTileSet from '../assets/extruded_desert.png';
@@ -11,6 +12,7 @@ import { Rectangle } from '../2d-visibility/rectangle';
 import { loadMap } from '../2d-visibility/load-map';
 import { calculateVisibility } from '../2d-visibility/visibility';
 import { WebSocketHandler } from '../utils/WebSocketHandler';
+import { teamType } from '../typings/ws-messages';
 
 type OpponentPostion = {
   pos: {
@@ -22,13 +24,8 @@ type OpponentPostion = {
     y: number;
   };
   rot: number;
+  team: teamType;
 };
-
-// type Message = {
-//   id?: string;
-//   update?: trackableObjects;
-//   dissconnected?: string;
-// };
 
 export class GameScene extends Phaser.Scene {
   gameObjects: Phaser.GameObjects.GameObject[] = [];
@@ -61,7 +58,11 @@ export class GameScene extends Phaser.Scene {
   }
 
   public preload() {
-    this.load.spritesheet('player', PlayerSprite, {
+    this.load.spritesheet('playerPurple', PlayerPurpleSprite, {
+      frameWidth: 78,
+      frameHeight: 51,
+    });
+    this.load.spritesheet('playerOrange', PlayerOrangeSprite, {
       frameWidth: 78,
       frameHeight: 51,
     });
@@ -102,8 +103,8 @@ export class GameScene extends Phaser.Scene {
     this.water.setCollisionByProperty({ collides: true });
 
     this.anims.create({
-      key: 'blood',
-      frames: this.anims.generateFrameNumbers('player', {
+      key: 'blood_purple',
+      frames: this.anims.generateFrameNumbers('playerPurple', {
         start: 0,
         end: 2,
       }),
@@ -112,8 +113,8 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: 'idle',
-      frames: this.anims.generateFrameNumbers('player', {
+      key: 'idle_purple',
+      frames: this.anims.generateFrameNumbers('playerPurple', {
         start: 3,
         end: 22,
       }),
@@ -122,8 +123,8 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: 'move',
-      frames: this.anims.generateFrameNumbers('player', {
+      key: 'move_purple',
+      frames: this.anims.generateFrameNumbers('playerPurple', {
         start: 23,
         end: 42,
       }),
@@ -132,8 +133,48 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: 'shoot',
-      frames: this.anims.generateFrameNumbers('player', {
+      key: 'shoot_purple',
+      frames: this.anims.generateFrameNumbers('playerPurple', {
+        start: 43,
+        end: 45,
+      }),
+      frameRate: 15,
+      repeat: 0,
+    });
+
+    this.anims.create({
+      key: 'blood_orange',
+      frames: this.anims.generateFrameNumbers('playerOrange', {
+        start: 0,
+        end: 2,
+      }),
+      frameRate: 15,
+      repeat: 0,
+    });
+
+    this.anims.create({
+      key: 'idle_orange',
+      frames: this.anims.generateFrameNumbers('playerOrange', {
+        start: 3,
+        end: 22,
+      }),
+      frameRate: 15,
+      repeat: -1,
+    });
+
+    this.anims.create({
+      key: 'move_orange',
+      frames: this.anims.generateFrameNumbers('playerOrange', {
+        start: 23,
+        end: 42,
+      }),
+      frameRate: 15,
+      repeat: -1,
+    });
+
+    this.anims.create({
+      key: 'shoot_orange',
+      frames: this.anims.generateFrameNumbers('playerOrange', {
         start: 43,
         end: 45,
       }),

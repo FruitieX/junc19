@@ -2,7 +2,6 @@ import {
   WsMessage,
   isInitMsg,
   isDisconnectMsg,
-  isPlayerPosUpdateMsg,
   isHitMsg,
   isBulletSpawnMsg,
   isAllPlayerPosUpdateMsg,
@@ -44,7 +43,9 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
       // ignore our own playerId
       if (key !== gameScene.ws!.playerId) {
         if (gameScene.opponentMap[key] === undefined) {
-          gameScene.gameObjects.push(new Opponent(gameScene, key));
+          gameScene.gameObjects.push(
+            new Opponent(gameScene, key, updatedPositions[key].team),
+          );
         }
         gameScene.opponentMap[key] = updatedPositions[key];
       }

@@ -22,6 +22,7 @@ export interface TrackablePlayerData {
     x: number;
     y: number;
   };
+  team: teamType;
 }
 export interface Connection {
   id: string;
@@ -55,14 +56,18 @@ wss.on('connection', (ws: WebSocket) => {
     //log the received message and send it back to the client
     //check if there are other connections
 
+    let sender = connections.find(it => it.socket === ws);
+
     let message = JSON.parse(data) as WsMessage;
     if (isPlayerPosUpdateMsg(message)) {
-      trackableObjects[message.data.id] = message.data;
+      trackableObjects[message.data.id] = {
+        ...message.data,
+        team: sender!.teamId,
+      };
     }
     if (isBulletSpawnMsg(message)) {
-      let it = connections.find(it => it.socket === ws);
-      if (it) {
-        broadcast(message, it.id);
+      if (sender) {
+        broadcast(message, sender.id);
       }
     }
     if (isHitMsg(message)) {
