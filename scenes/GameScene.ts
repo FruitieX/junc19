@@ -10,15 +10,12 @@ export class GameScene extends Phaser.Scene {
   gameObjects: Phaser.GameObjects.GameObject[] = [];
   music?: Phaser.Sound.BaseSound;
   minimap?: Phaser.Cameras.Scene2D.CameraManager;
-  game: Phaser.Game;
   mousePosition?: Phaser.Math.Vector2;
   barriers?: Phaser.Tilemaps.StaticTilemapLayer;
 
-  constructor(game: Phaser.Game) {
-    super(game);
-    this.game = game;
+  constructor() {
+    super({ key: 'gameScene' });
   }
-
   public preload() {
     this.load.spritesheet('player', PlayerSprite, {
       frameWidth: 78,
