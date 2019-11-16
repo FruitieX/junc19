@@ -26,6 +26,8 @@ export class GameScene extends Phaser.Scene {
   graphics?: Phaser.GameObjects.Graphics;
   blocks?: Rectangle[];
   mapBounds?: Rectangle;
+  visibilityOverlay: Phaser.GameObjects.Graphics;
+  visibilityMask: Phaser.GameObjects.Graphics;
 
   constructor() {
     super({ key: 'gameScene' });
@@ -96,7 +98,8 @@ export class GameScene extends Phaser.Scene {
       repeat: 0,
     });
 
-    this.graphics = this.make.graphics({});
+    this.visibilityOverlay = this.make.graphics({});
+    this.visibilityMask = this.make.graphics({});
 
     const player = new Player(this);
     this.player = player;
@@ -183,16 +186,20 @@ export class GameScene extends Phaser.Scene {
         ),
     );
 
-    const visibilityMask = this.graphics.createGeometryMask();
-    this.cameras.main.setMask(visibilityMask);
+    const mask = this.visibilityMask.createGeometryMask();
+    mask.setInvertAlpha(true);
+    this.visibilityOverlay.fillStyle(0, 0.5);
+    this.visibilityOverlay.fillRect(0, 0, 10000, 10000);
+    this.visibilityOverlay.setMask(mask);
+    this.add.existing(this.visibilityOverlay);
   }
 
   public update() {
     this.gameObjects.forEach(o => o.update());
 
-    if (this.mapBounds && this.blocks && this.graphics) {
-      this.graphics.x = -this.cameras.main.scrollX;
-      this.graphics.y = -this.cameras.main.scrollY;
+    if (this.mapBounds && this.blocks && this.visibilityMask) {
+      this.visibilityOverlay.x = -this.cameras.main.scrollX;
+      this.visibilityOverlay.y = -this.cameras.main.scrollY;
 
       const playerPoint = {
         x: this.player?.body.x + 32,
@@ -202,10 +209,10 @@ export class GameScene extends Phaser.Scene {
       const endpoints = loadMap(this.mapBounds, this.blocks, [], playerPoint);
       const visibility = calculateVisibility(playerPoint, endpoints);
 
-      this.graphics.clear();
+      this.visibilityMask.clear();
 
       visibility.forEach(points => {
-        this.graphics?.fillStyle(0).fillPoints([playerPoint, ...points]);
+        this.visibilityMask?.fillStyle(0).fillPoints([playerPoint, ...points]);
       });
     }
   }
