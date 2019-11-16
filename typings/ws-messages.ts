@@ -18,10 +18,22 @@ export interface DisconnectMsg {
 export const isDisconnectMsg = (msg: WsMessage): msg is DisconnectMsg =>
   (msg as DisconnectMsg).kind === 'Disconnect';
 
+export interface AllPlayerPosUpdateMsg {
+  kind: 'AllPlayerPosUpdate';
+  data: {
+    pos: trackableObjects;
+  };
+}
+export const isAllPlayerPosUpdateMsg = (
+  msg: WsMessage,
+): msg is AllPlayerPosUpdateMsg =>
+  (msg as AllPlayerPosUpdateMsg).kind === 'AllPlayerPosUpdate';
+
 export interface PlayerPosUpdateMsg {
   kind: 'PlayerPosUpdate';
   data: {
-    pos: trackableObjects;
+    id: string;
+    pos: { x: number; y: number };
   };
 }
 
@@ -41,4 +53,9 @@ export interface HitMsg {
 export const isHitMsg = (msg: WsMessage): msg is HitMsg =>
   (msg as HitMsg).kind === 'Hit';
 
-export type WsMessage = InitMsg | DisconnectMsg | PlayerPosUpdateMsg | HitMsg;
+export type WsMessage =
+  | InitMsg
+  | DisconnectMsg
+  | PlayerPosUpdateMsg
+  | HitMsg
+  | AllPlayerPosUpdateMsg;
