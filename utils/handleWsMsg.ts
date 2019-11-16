@@ -5,6 +5,7 @@ import {
   isPlayerPosUpdateMsg,
   isHitMsg,
   isBulletSpawnMsg,
+  isAllPlayerPosUpdateMsg,
 } from '../typings/ws-messages';
 import { GameScene } from '../scenes/GameScene';
 import { Opponent } from '../gameObjects/Opponent';
@@ -31,7 +32,7 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
     }
   }
 
-  if (isPlayerPosUpdateMsg(message)) {
+  if (isAllPlayerPosUpdateMsg(message)) {
     const updatedPositions = message.data.pos;
     for (const key in updatedPositions) {
       // ignore our own playerId
@@ -67,15 +68,4 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
       ),
     );
   }
-
-  // if (this.id !== undefined && message.update !== undefined) {
-  //   for (let key in message.update) {
-  //     if (key !== this.id) {
-  //       if (this.opponentMap[key] === undefined) {
-  //         this.gameObjects.push(new Opponent(this, this.spawnBullet, key));
-  //       }
-  //       this.opponentMap[key] = message.update[key];
-  //     }
-  //   }
-  // }
 };
