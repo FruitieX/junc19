@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "parcel index.html",
-    "reformat": "prettier --write *.{ts,html,css,json,md}"
+    "start": "parcel serve --no-hmr index.html",
+    "reformat": "prettier --write *.{ts,html,css,json,md}",
+    "build": "parcel build index.html"
   },
   "repository": {
     "type": "git",

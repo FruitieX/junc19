@@ -7,9 +7,11 @@ import {
   isPlayerPosUpdateMsg,
   AllPlayerPosUpdateMsg,
   isBulletSpawnMsg,
-  teamType,
+  TeamType,
   isHitMsg,
   DisconnectMsg,
+  isFlagStateMsg,
+  GameStateMsg,
 } from '../typings/ws-messages';
 
 export interface TrackablePlayerData {
@@ -22,11 +24,12 @@ export interface TrackablePlayerData {
     x: number;
     y: number;
   };
+  team: TeamType;
 }
 export interface Connection {
   id: string;
   socket: WebSocket;
-  teamId: teamType;
+  teamId: TeamType;
 }
 export type TrackableObjects = { [id: string]: TrackablePlayerData };
 
@@ -40,6 +43,40 @@ const wss = new WebSocket.Server({ server });
 
 var connections: Connection[] = [];
 
+const maxScore = 5;
+interface GameState {
+  team1Score: number;
+  team2Score: number;
+  gameActive: boolean;
+  maxScore: number;
+}
+const initialState: GameState = {
+  team1Score: 0,
+  team2Score: 0,
+  gameActive: true,
+  maxScore,
+};
+
+let state = { ...initialState };
+
+const broadcastGameState = () => {
+  const msg: GameStateMsg = {
+    kind: 'GameState',
+    data: state,
+  };
+  broadcast(msg);
+};
+
+const reset = () => {
+  state = { ...initialState };
+  broadcastGameState();
+};
+
+const endGame = (winningTeam: 1 | 2) => {
+  state.gameActive = false;
+  setTimeout(reset, 5000);
+};
+
 wss.on('connection', (ws: WebSocket) => {
   //connection is up, let's add a simple simple
 
@@ -50,27 +87,64 @@ wss.on('connection', (ws: WebSocket) => {
 
   const initMsg: InitMsg = { kind: 'Init', data: { playerId: playerId, team } };
   ws.send(JSON.stringify(initMsg));
+  const msg: GameStateMsg = {
+    kind: 'GameState',
+    data: state,
+  };
+  ws.send(JSON.stringify(msg));
 
   ws.on('message', (data: string) => {
     //log the received message and send it back to the client
     //check if there are other connections
 
+    let sender = connections.find(it => it.socket === ws);
+
     let message = JSON.parse(data) as WsMessage;
+
     if (isPlayerPosUpdateMsg(message)) {
-      trackableObjects[message.data.id] = message.data;
+      trackableObjects[message.data.id] = {
+        ...message.data,
+        team: sender!.teamId,
+      };
     }
+
     if (isBulletSpawnMsg(message)) {
-      let it = connections.find(it => it.socket === ws);
-      if (it) {
-        broadcast(message, it.id);
+      if (sender) {
+        broadcast(message, sender.id);
       }
     }
+
     if (isHitMsg(message)) {
       const hitPlayerId = message.data.playerId;
       let it = connections.find(it => it.id === hitPlayerId);
 
       if (it) {
         it.socket.send(JSON.stringify(message));
+      }
+    }
+
+    if (isFlagStateMsg(message)) {
+      let it = connections.find(it => it.socket === ws);
+      if (it) {
+        broadcast(message, it.id);
+      }
+
+      if (message.data.event === 'Capture') {
+        if (message.data.flagTeam === 1) {
+          state.team2Score += 1;
+
+          if (state.team2Score >= maxScore) {
+            endGame(2);
+          }
+        } else {
+          state.team1Score += 1;
+
+          if (state.team1Score >= maxScore) {
+            endGame(1);
+          }
+        }
+
+        broadcastGameState();
       }
     }
   });
@@ -107,7 +181,7 @@ setInterval(() => {
   });
 }, 1000 / 20);
 
-const broadcast = (message: WsMessage, sender: string) => {
+const broadcast = (message: WsMessage, sender?: string) => {
   connections
     .filter(c => c.id !== sender)
     .forEach(c => {
@@ -127,7 +201,7 @@ const genId = (): string => {
     .toString(36)
     .substring(7);
 };
-const getTeam = (): teamType => {
+const getTeam = (): TeamType => {
   const teamGretaTeamSize = connections.filter(c => c.teamId === 'Team New')
     .length;
   const teamTrumpTeamSize = connections.filter(c => c.teamId === 'Team Old')

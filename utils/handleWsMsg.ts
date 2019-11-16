@@ -2,10 +2,11 @@ import {
   WsMessage,
   isInitMsg,
   isDisconnectMsg,
-  isPlayerPosUpdateMsg,
   isHitMsg,
   isBulletSpawnMsg,
   isAllPlayerPosUpdateMsg,
+  isFlagStateMsg,
+  isGameStateMsg,
 } from '../typings/ws-messages';
 import { GameScene } from '../scenes/GameScene';
 import { Opponent } from '../gameObjects/Opponent';
@@ -44,7 +45,9 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
       // ignore our own playerId
       if (key !== gameScene.ws!.playerId) {
         if (gameScene.opponentMap[key] === undefined) {
-          gameScene.gameObjects.push(new Opponent(gameScene, key));
+          gameScene.gameObjects.push(
+            new Opponent(gameScene, key, updatedPositions[key].team),
+          );
         }
         gameScene.opponentMap[key] = updatedPositions[key];
       }
@@ -76,6 +79,59 @@ export const handleWsMsg = (gameScene: GameScene) => (ev: MessageEvent) => {
     );
 
     return;
+  }
+
+  if (isFlagStateMsg(message)) {
+    const data = message.data;
+    const flag = data.flagTeam === 1 ? gameScene.flag1! : gameScene.flag2!;
+    const enemyFlag = flag.isEnemyFlag;
+
+    switch (data.event) {
+      case 'PickUp': {
+        flag.heldByPlayerId = data.playerId;
+
+        if (enemyFlag) {
+          gameScene.setStatusText('Your team has the enemy flag!');
+        } else {
+          gameScene.setStatusText('The enemy has your flag!');
+        }
+
+        break;
+      }
+      case 'Drop': {
+        flag.heldByPlayerId = undefined;
+        break;
+      }
+      case 'Return': {
+        flag.returnHome();
+
+        if (enemyFlag) {
+          gameScene.setStatusText('The enemy flag was returned.');
+        } else {
+          gameScene.setStatusText('Your flag was returned.');
+        }
+
+        break;
+      }
+      case 'Capture': {
+        flag.returnHome();
+
+        if (enemyFlag) {
+          gameScene.setStatusText('Your team scored a capture!');
+        } else {
+          gameScene.setStatusText('The enemy team scored a capture.');
+        }
+
+        break;
+      }
+      default: {
+        console.log('unhandled flag state msg:', message);
+      }
+    }
+  }
+
+  if (isGameStateMsg(message)) {
+    gameScene.updateGameState(message.data);
   }
 
   console.log('unhandled msg', message);

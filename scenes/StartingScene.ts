@@ -1,5 +1,4 @@
-import Phaser, { NONE } from 'phaser';
-import { Player } from '../gameObjects/Player';
+import Phaser, { Tilemaps } from 'phaser';
 import joinButtonImg from '../assets/menu/join_game.png';
 import exitButtonImg from '../assets/menu/exit.png';
 import localButtonImg from '../assets/menu/local_game.png';
@@ -7,15 +6,14 @@ import joinButtonImgSel from '../assets/menu/join_game_selected.png';
 import exitButtonImgSel from '../assets/menu/exit_selected.png';
 import localButtonImgSel from '../assets/menu/local_game_selected.png';
 
-import { GameScene } from './GameScene';
-
 export class StartScene extends Phaser.Scene {
-  gameObjects: Phaser.GameObjects.GameObject[] = [];
   mousePosition?: Phaser.Math.Vector2;
   joinButton?: Phaser.GameObjects.Image;
   exitButton?: Phaser.GameObjects.Image;
   localButton?: Phaser.GameObjects.Image;
   start: boolean = false;
+  menuVal: number = 1;
+  throttler: boolean = false;
 
   constructor() {
     super({ key: 'startScene' });
@@ -23,9 +21,9 @@ export class StartScene extends Phaser.Scene {
   public preload() {
     this.load.image('exitButton', exitButtonImg);
     this.load.image('joinButton', joinButtonImg);
+    this.load.image('localButton', localButtonImg);
     this.load.image('exitButtonSel', exitButtonImgSel);
     this.load.image('joinButtonSel', joinButtonImgSel);
-    this.load.image('localButton', localButtonImg);
     this.load.image('localButtonSel', localButtonImgSel);
   }
 
@@ -62,12 +60,14 @@ export class StartScene extends Phaser.Scene {
     });
 
     this.exitButton.on('pointerup', () => {
-      this.add.text(420, 420, 'Håll käft', { fontSize: '64px', color: '#000' });
+      this.add.text(100, 420, 'You can now turn off your computer', {
+        fontSize: '48px',
+        color: '#000',
+      });
     });
   }
 
   public update() {
-    let menuVal = 1;
     const gamepad: Phaser.Input.Gamepad.Gamepad | undefined = this.input.gamepad
       ?.pad1;
     const upkey: Phaser.Input.Keyboard.Key = this.input.keyboard.addKey('up');
@@ -81,49 +81,53 @@ export class StartScene extends Phaser.Scene {
       'enter',
     );
 
-    const confirm: Boolean =
+    const confirm: boolean =
       spacekey.isDown ||
       enterkey.isDown ||
       gamepad?.A ||
       gamepad?.B ||
       !!gamepad?.R2;
 
-    this.gameObjects.forEach(o => o.update());
-
     if (upkey.isDown || gamepad?.up) {
-      this.exitButton?.setTexture('exitButton');
-      this.joinButton?.setTexture('joinButton');
-      this.localButton?.setTexture('localButton');
-
-      menuVal = menuVal - 1;
+      if (!this.throttler) {
+        this.menuVal = this.menuVal - 1;
+      }
+      this.throttler = true;
     } else if (downkey.isDown || gamepad?.down) {
-      this.exitButton?.setTexture('exitButton');
-      this.joinButton?.setTexture('joinButton');
-      this.localButton?.setTexture('localButton');
-
-      menuVal = menuVal + 1;
+      if (!this.throttler) {
+        this.menuVal = this.menuVal + 1;
+      }
+      this.throttler = true;
+    } else {
+      this.throttler = false;
     }
 
-    if (menuVal > 3) {
-      menuVal = 3;
-    } else if (menuVal < 1) {
-      menuVal = 1;
+    if (this.menuVal > 3) {
+      this.menuVal = 3;
+    } else if (this.menuVal < 1) {
+      this.menuVal = 1;
     }
 
-    switch (menuVal) {
+    switch (this.menuVal) {
       case 1:
+        this.exitButton?.setTexture('exitButton');
+        this.localButton?.setTexture('localButton');
         this.joinButton?.setTexture('joinButtonSel');
         break;
       case 2:
+        this.exitButton?.setTexture('exitButton');
+        this.joinButton?.setTexture('joinButton');
         this.localButton?.setTexture('localButtonSel');
         break;
       case 3:
+        this.joinButton?.setTexture('joinButton');
+        this.localButton?.setTexture('localButton');
         this.exitButton?.setTexture('exitButtonSel');
         break;
     }
 
     if (confirm) {
-      switch (menuVal) {
+      switch (this.menuVal) {
         case 1:
           this.scene.start('gameScene', new Boolean(true));
           break;
@@ -131,8 +135,8 @@ export class StartScene extends Phaser.Scene {
           this.scene.start('gameScene', new Boolean(false));
           break;
         case 3:
-          this.add.text(420, 420, 'Håll käft', {
-            fontSize: '64px',
+          this.add.text(100, 420, 'You can now turn off your computer', {
+            fontSize: '48px',
             color: '#000',
           });
           break;
