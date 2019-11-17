@@ -56,6 +56,8 @@ export class GameScene extends Phaser.Scene {
   gameState: GameState;
 
   gameWasActive: boolean;
+  team1Spawns?: Phaser.GameObjects.Sprite[];
+  team2Spawns?: Phaser.GameObjects.Sprite[];
 
   constructor() {
     super({ key: 'gameScene' });
@@ -257,6 +259,13 @@ export class GameScene extends Phaser.Scene {
     });
     this.gameObjects.push(this.flag2);
 
+    this.team1Spawns = map.createFromObjects('Spawns', 'team1', {
+      visible: false,
+    });
+    this.team2Spawns = map.createFromObjects('Spawns', 'team2', {
+      visible: false,
+    });
+
     // background music
     this.music = this.sound.add('music', {
       mute: false,
@@ -447,7 +456,30 @@ export class GameScene extends Phaser.Scene {
         y: (this.player?.body as Phaser.Physics.Arcade.Body).y + 20,
       };
 
-      const endpoints = loadMap(this.mapBounds, this.blocks, [], playerPoint);
+      const camera = this.cameras.main;
+
+      // only consider on screen blocks for visibility calculations
+      const onScreenBlocks = this.blocks.filter(block => {
+        if (
+          block.x + block.width < camera.scrollX ||
+          block.x > camera.scrollX + camera.width
+        )
+          return false;
+        if (
+          block.y + block.height < camera.scrollY ||
+          block.y > camera.scrollY + camera.height
+        )
+          return false;
+
+        return true;
+      });
+
+      const endpoints = loadMap(
+        this.mapBounds,
+        onScreenBlocks,
+        [],
+        playerPoint,
+      );
       const visibility = calculateVisibility(playerPoint, endpoints);
 
       this.visibilityMask.clear();
