@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { GameScene } from '../scenes/GameScene';
 import { Bullet } from '../gameObjects/Bullet';
-import { BulletSpawnMsg, TeamType } from '../typings/ws-messages';
+import { BulletSpawnMsg, TeamType, team1Name } from '../typings/ws-messages';
 import { Flag } from './Flag';
 
 interface InputState {
@@ -118,14 +118,20 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       `You are joining ${team} (playerId: ${this.scene.ws?.playerId})`,
     );
 
+    const teamNumber = team === team1Name ? 1 : 2;
+
     this.hp = 100;
     this.team = team;
 
-    if (team === 'Team New') {
-      this.setPosition(10 * 32, 50 * 32);
+    const t1spawns = this.gameScene.team1Spawns!;
+    const t2spawns = this.gameScene.team2Spawns!;
+
+    if (teamNumber === 1) {
+      const pos = t1spawns[Math.floor(Math.random() * t1spawns.length)];
+      this.setPosition(pos.x * 2, pos.y * 2);
     } else {
-      // this.setPosition(83 * 32, 50 * 32);
-      this.setPosition(15 * 32, 50 * 32);
+      const pos = t2spawns[Math.floor(Math.random() * t2spawns.length)];
+      this.setPosition(pos.x * 2, pos.y * 2);
     }
 
     this.isAddedToMap = true;

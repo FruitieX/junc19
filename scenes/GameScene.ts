@@ -55,6 +55,8 @@ export class GameScene extends Phaser.Scene {
   gameState: GameState;
 
   gameWasActive: boolean;
+  team1Spawns?: Phaser.GameObjects.Sprite[];
+  team2Spawns?: Phaser.GameObjects.Sprite[];
 
   constructor() {
     super({ key: 'gameScene' });
@@ -250,6 +252,13 @@ export class GameScene extends Phaser.Scene {
       y: flag2_tile.y * MAP_SCALE,
     });
     this.gameObjects.push(this.flag2);
+
+    this.team1Spawns = map.createFromObjects('Spawns', 'team1', {
+      visible: false,
+    });
+    this.team2Spawns = map.createFromObjects('Spawns', 'team2', {
+      visible: false,
+    });
 
     // background music
     this.music = this.sound.add('music', {
