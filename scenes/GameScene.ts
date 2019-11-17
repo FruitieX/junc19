@@ -450,7 +450,30 @@ export class GameScene extends Phaser.Scene {
         y: (this.player?.body as Phaser.Physics.Arcade.Body).y + 20,
       };
 
-      const endpoints = loadMap(this.mapBounds, this.blocks, [], playerPoint);
+      const camera = this.cameras.main;
+
+      // only consider on screen blocks for visibility calculations
+      const onScreenBlocks = this.blocks.filter(block => {
+        if (
+          block.x + block.width < camera.scrollX ||
+          block.x > camera.scrollX + camera.width
+        )
+          return false;
+        if (
+          block.y + block.height < camera.scrollY ||
+          block.y > camera.scrollY + camera.height
+        )
+          return false;
+
+        return true;
+      });
+
+      const endpoints = loadMap(
+        this.mapBounds,
+        onScreenBlocks,
+        [],
+        playerPoint,
+      );
       const visibility = calculateVisibility(playerPoint, endpoints);
 
       this.visibilityMask.clear();
