@@ -20054,8 +20054,140 @@
           "type": "",
           "visible": true,
           "width": 0,
-          "x": 272,
-          "y": 848
+          "x": 1152,
+          "y": 1248
+        }
+      ],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "draworder": "topdown",
+      "id": 7,
+      "name": "Spawns",
+      "objects": [
+        {
+          "height": 0,
+          "id": 3,
+          "name": "team1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 96,
+          "y": 704
+        },
+        {
+          "height": 0,
+          "id": 4,
+          "name": "team1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 464,
+          "y": 1088
+        },
+        {
+          "height": 0,
+          "id": 5,
+          "name": "team1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 112,
+          "y": 1120
+        },
+        {
+          "height": 0,
+          "id": 6,
+          "name": "team1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 160,
+          "y": 1488
+        },
+        {
+          "height": 0,
+          "id": 7,
+          "name": "team1",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 352,
+          "y": 800
+        },
+        {
+          "height": 0,
+          "id": 8,
+          "name": "team2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1536,
+          "y": 256
+        },
+        {
+          "height": 0,
+          "id": 9,
+          "name": "team2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1008,
+          "y": 800
+        },
+        {
+          "height": 0,
+          "id": 10,
+          "name": "team2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 928,
+          "y": 1488
+        },
+        {
+          "height": 0,
+          "id": 11,
+          "name": "team2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1328,
+          "y": 272
+        },
+        {
+          "height": 0,
+          "id": 12,
+          "name": "team2",
+          "point": true,
+          "rotation": 0,
+          "type": "",
+          "visible": true,
+          "width": 0,
+          "x": 1408,
+          "y": 544
         }
       ],
       "opacity": 1,
@@ -40091,8 +40223,8 @@
       "y": 0
     }
   ],
-  "nextlayerid": 7,
-  "nextobjectid": 3,
+  "nextlayerid": 9,
+  "nextobjectid": 13,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.2.4",
